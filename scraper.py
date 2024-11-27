@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import sqlite3
 
 URL = "https://thegreatbritishbakeoff.co.uk/recipes/all/"
 page = requests.get(URL)
@@ -27,7 +26,6 @@ def extract(card):
   time = next(iter(meta.select('span[class*="bakingTime"]')), None)
   if time != None:
     time = time.string
-
 
   return {
     'link': card.find('a')['href'],
