@@ -12,14 +12,15 @@ con.execute('''
             (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            img TEXT NOT NULL
+            img TEXT NOT NULL,
+            UNIQUE(name, img)
             );''')
 
 con.execute('''
             CREATE TABLE diets
             (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL
+            name TEXT NOT NULL UNIQUE
             );''')
 
 con.execute('''
@@ -27,7 +28,7 @@ con.execute('''
             (
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
             title TEXT NOT NULL, 
-            link TEXT NOT NULL, 
+            link TEXT NOT NULL UNIQUE, 
             img TEXT NOT NULL, 
             difficulty INTEGER NOT NULL,
             is_technical INTEGER NOT NULL,
@@ -43,7 +44,8 @@ con.execute('''
             recipe_id INTEGER NOT NULL,
             diet_id INTEGER NOT NULL,
             FOREIGN KEY(recipe_id) REFERENCES recipes(id),
-            FOREIGN KEY(diet_id) REFERENCES diets(id)
+            FOREIGN KEY(diet_id) REFERENCES diets(id),
+            UNIQUE(recipe_id, diet_id)
             );''')
 
 

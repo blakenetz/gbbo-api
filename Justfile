@@ -39,6 +39,8 @@ scrape:
 
     if [ ! -d $VENV_PATH ]; then
         echo "🍰 it doesn't appear this project has been setup. Try running\n\`just setup\`";
+    elif [ ! -f {{justfile_directory()}}/gbbo.db ]; then
+        echo "🍰 it doesn't appear the db hasn't been properly created. Try running\n\`just db\`";
     else
         echo "🍰 Scrapping...";
         source ${VENV_PATH}bin/activate;
