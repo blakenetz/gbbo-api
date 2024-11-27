@@ -10,7 +10,7 @@ con.execute('DROP TABLE IF EXISTS bakers;')
 con.execute('''
             CREATE TABLE bakers 
             (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
             img TEXT NOT NULL,
             UNIQUE(name, img)
@@ -19,14 +19,14 @@ con.execute('''
 con.execute('''
             CREATE TABLE diets
             (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY,
             name TEXT NOT NULL UNIQUE
             );''')
 
 con.execute('''
             CREATE TABLE recipes 
             (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            id INTEGER PRIMARY KEY, 
             title TEXT NOT NULL, 
             link TEXT NOT NULL UNIQUE, 
             img TEXT NOT NULL, 
@@ -40,7 +40,7 @@ con.execute('''
 con.execute(''' 
             CREATE TABLE recipe_diets
             (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY,
             recipe_id INTEGER NOT NULL,
             diet_id INTEGER NOT NULL,
             FOREIGN KEY(recipe_id) REFERENCES recipes(id),

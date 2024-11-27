@@ -48,8 +48,6 @@ def extract(card):
 
 results = list(map(extract, cards))
 
-# print(results)
-
 for result in results:  
   sql.execute('INSERT OR IGNORE INTO bakers(name, img) VALUES(?,?)', (result["baker"]['name'], result["baker"]['img']))
   baker_id = sql.lastrowid
@@ -64,9 +62,13 @@ for result in results:
   
   if len(result["diets"]) > 0:
     sql.executemany("INSERT OR IGNORE INTO diets(name) VALUES(?)", result["diets"])
+    sql.execute('SELECT * FROM diets')
+    ids = sql.fetchall()
+    print(ids)
     # for diet_id in result["diets"]:
     #   sql.execute('INSERT INTO recipe_diets(recipe_id, diet_id) VALUES(?,?)', (recipe_id, diet_id))
     
-
+connection.commit()
+connection.close()
   
 
