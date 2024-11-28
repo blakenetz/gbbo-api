@@ -2,15 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import sqlite3
 
-connection = sqlite3.connect("gbbo.db")
-sql = connection.cursor()
-
 URL = "https://thegreatbritishbakeoff.co.uk/recipes/all/"
 page = requests.get(URL)
-
 soup = BeautifulSoup(page.content, "html.parser")
-
-cards = soup.find_all(class_="recipes-loop__item")
 
 def extract(card):
   figure = card.find("figure")
@@ -46,37 +40,42 @@ def extract(card):
     'time': time
   }
 
-results = list(map(extract, cards))
+def main():
+  connection = sqlite3.connect("gbbo.db")
+  sql = connection.cursor()
 
-for result in results:  
-  sql.execute('INSERT OR IGNORE INTO bakers(name, img) VALUES(?,?)', (result["baker"]['name'], result["baker"]['img']))
-  baker_id = sql.lastrowid
+  cards = soup.find_all(class_="recipes-loop__item")
+  results = list(map(extract, cards))
 
-  sql.execute(''' 
-              INSERT INTO recipes(link, img, title, difficulty, is_technical, time, baker_id) 
-                VALUES(?,?,?,?,?,?,?)
-              ''', 
-              (result["link"], result["img"], result["title"], result["difficulty"], result["is_technical"], result["time"], baker_id)
-              )
-  recipe_id = sql.lastrowid
-  
-  
-  if len(result["diets"]) == 0:
-    connection.commit()
-  else:
-    # insert into diets table
-    diet_params = list(map(lambda x: (x,), result['diets']))
-    sql.executemany("INSERT OR IGNORE INTO diets(name) VALUES(?)", diet_params)
-    connection.commit()
-    # fetch diet_id array
-    placeholders = ','.join('?' * len(result["diets"]))
-    sql.execute(f'SELECT id FROM diets WHERE name IN ({placeholders})', result['diets'])
-    diet_ids = sql.fetchall()
-    # create (diet_id, recipe_id) tuple and insert into recipe_diets table
-    recipe_diet_params = list(map(lambda x: (*x, recipe_id), diet_ids))
-    sql.executemany("INSERT OR IGNORE INTO recipe_diets(diet_id, recipe_id) VALUES(?,?)", recipe_diet_params)
-    connection.commit()
+  for result in results:  
+    sql.execute('INSERT OR IGNORE INTO bakers(name, img) VALUES(?,?)', (result["baker"]['name'], result["baker"]['img']))
+    baker_id = sql.lastrowid
+
+    sql.execute(''' 
+                INSERT INTO recipes(link, img, title, difficulty, is_technical, time, baker_id) 
+                  VALUES(?,?,?,?,?,?,?)
+                ''', 
+                (result["link"], result["img"], result["title"], result["difficulty"], result["is_technical"], result["time"], baker_id)
+                )
+    recipe_id = sql.lastrowid
     
-connection.close()
-  
+    if len(result["diets"]) == 0:
+      connection.commit()
+    else:
+      # insert into diets table
+      diet_params = list(map(lambda x: (x,), result['diets']))
+      sql.executemany("INSERT OR IGNORE INTO diets(name) VALUES(?)", diet_params)
+      connection.commit()
+      # fetch diet_id array
+      placeholders = ','.join('?' * len(result["diets"]))
+      sql.execute(f'SELECT id FROM diets WHERE name IN ({placeholders})', result['diets'])
+      diet_ids = sql.fetchall()
+      # create (diet_id, recipe_id) tuple and insert into recipe_diets table
+      recipe_diet_params = list(map(lambda x: (*x, recipe_id), diet_ids))
+      sql.executemany("INSERT OR IGNORE INTO recipe_diets(diet_id, recipe_id) VALUES(?,?)", recipe_diet_params)
+      connection.commit()
+    
+    connection.close()
 
+if __name__ == '__main__':
+    main()
