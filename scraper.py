@@ -41,7 +41,7 @@ def extract(card):
       'img': thumbnail['src']
     },
     'difficulty': difficulty,
-    'diets': list(map(lambda x: (x["title"], ), dietary)),
+    'diets': list(map(lambda x: x["title"], dietary)),
     'is_technical': 1 if card.find(class_="recipes-loop__item__tag") is not None else 0,
     'time': time
   }
@@ -60,15 +60,23 @@ for result in results:
               )
   recipe_id = sql.lastrowid
   
-  if len(result["diets"]) > 0:
-    sql.executemany("INSERT OR IGNORE INTO diets(name) VALUES(?)", result["diets"])
-    sql.execute('SELECT * FROM diets')
-    ids = sql.fetchall()
-    print(ids)
-    # for diet_id in result["diets"]:
-    #   sql.execute('INSERT INTO recipe_diets(recipe_id, diet_id) VALUES(?,?)', (recipe_id, diet_id))
+  
+  if len(result["diets"]) == 0:
+    connection.commit()
+  else:
+    # insert into diets table
+    diet_params = list(map(lambda x: (x,), result['diets']))
+    sql.executemany("INSERT OR IGNORE INTO diets(name) VALUES(?)", diet_params)
+    connection.commit()
+    # fetch diet_id array
+    placeholders = ','.join('?' * len(result["diets"]))
+    sql.execute(f'SELECT id FROM diets WHERE name IN ({placeholders})', result['diets'])
+    diet_ids = sql.fetchall()
+    # create (diet_id, recipe_id) tuple and insert into recipe_diets table
+    recipe_diet_params = list(map(lambda x: (*x, recipe_id), diet_ids))
+    sql.executemany("INSERT OR IGNORE INTO recipe_diets(diet_id, recipe_id) VALUES(?,?)", recipe_diet_params)
+    connection.commit()
     
-connection.commit()
 connection.close()
   
 
