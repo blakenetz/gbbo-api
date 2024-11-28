@@ -44,7 +44,7 @@ scrape:
     else
         echo "🍰 Scrapping...";
         source ${VENV_PATH}bin/activate;
-        python scraper.py
+        python scraper/main.py
     fi;
 
 db:

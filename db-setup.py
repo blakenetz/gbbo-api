@@ -30,10 +30,10 @@ con.execute('''
             title TEXT NOT NULL, 
             link TEXT NOT NULL UNIQUE, 
             img TEXT NOT NULL, 
-            difficulty INTEGER NOT NULL,
+            difficulty INTEGER,
             is_technical INTEGER NOT NULL,
             time TEXT, 
-            baker_id INTEGER NOT NULL,
+            baker_id INTEGER,
             FOREIGN KEY (baker_id) REFERENCES bakers(id)
             );''')
 
