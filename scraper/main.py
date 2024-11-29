@@ -1,4 +1,4 @@
-from api import WebScraper
+from scraper import WebScraper
 
 def main() -> None:
   scraper = WebScraper()

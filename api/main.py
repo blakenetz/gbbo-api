@@ -12,7 +12,7 @@ class Recipe(SQLModel, table=True, extend_existing=True):
   img: str = Field(nullable=False)
   difficulty: Union[int, None]
   is_technical: bool = Field(nullable=False)
-  time: Union[str, None]
+  time: Union[int, None]
   baker_id: Union[int, None] = Field(default=None, foreign_key="bakers.id")
 
 class Diet(SQLModel, table=True, extend_existing=True):

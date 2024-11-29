@@ -1,9 +1,29 @@
+import dateparser
 import requests
 from bs4 import BeautifulSoup, PageElement, ResultSet
 import time
 import logging
 import sqlite3
 from typing import List
+import re
+
+def parse_time_to_minutes(time_str):
+  pattern = r"(\d+)\s*(d|h|m)"
+  matches = re.findall(pattern, time_str)
+
+  total_minutes = 0
+  for match in matches:
+    value, unit = match
+    value = int(value)
+
+    if unit == "d":
+      total_minutes += value * 24 * 60
+    elif unit == "h":
+      total_minutes += value * 60
+    elif unit == "m":
+      total_minutes += value
+
+  return total_minutes
 
 class WebScraper:
   def __init__(self):
@@ -20,6 +40,7 @@ class WebScraper:
     # Config DB connection
     self.connection = sqlite3.connect("gbbo.db")
     self.sql = self.connection.cursor()
+    # self.connection.set_trace_callback(print)
 
   def _generate_page_url(self, page_number: int) -> str:
     return f"{self.base_url}/page/{page_number}"
@@ -57,7 +78,7 @@ class WebScraper:
 
         time = next(iter(meta.select('span[class*="bakingTime"]')), None)
         if time != None:
-          time = time.string
+          time = parse_time_to_minutes(time.string)
 
         results.append({
           'link': card.find('a')['href'],
@@ -79,21 +100,22 @@ class WebScraper:
     self.logger.debug('Saving to DB...')
     for result in results:  
       baker_id = None
+      baker = result['baker']
       if (result['baker']):
-        self.sql.execute('INSERT OR IGNORE INTO bakers(name, img) VALUES(?,?)', (result["baker"]['name'], result["baker"]['img']))
-        baker_id = self.sql.lastrowid
+        self.sql.execute('INSERT OR IGNORE INTO bakers(name, img) VALUES(:name, :img)', baker)
+        rows = self.sql.execute("SELECT id FROM bakers WHERE name = :name", baker)
+        for row in rows:
+          baker_id = row[0]
 
       self.sql.execute(''' 
-                  INSERT INTO recipes(link, img, title, difficulty, is_technical, time, baker_id) 
-                    VALUES(?,?,?,?,?,?,?)
-                  ''', 
-                  (result["link"], result["img"], result["title"], result["difficulty"], result["is_technical"], result["time"], baker_id)
-                  )
+                       INSERT INTO recipes(link, img, title, difficulty, is_technical, time, baker_id) 
+                       VALUES(:link, :img, :title, :difficulty, :is_technical, :time, :baker_id)
+                       ''', 
+                       {**result, **{ "baker_id": baker_id }}
+                       )
       recipe_id = self.sql.lastrowid
       
-      if len(result["diets"]) == 0:
-        self.connection.commit()
-      else:
+      if len(result["diets"]) > 0:
         # insert into diets table
         diet_params = list(map(lambda x: (x,), result['diets']))
         self.sql.executemany("INSERT OR IGNORE INTO diets(name) VALUES(?)", diet_params)
@@ -105,7 +127,8 @@ class WebScraper:
         # create (diet_id, recipe_id) tuple and insert into recipe_diets table
         recipe_diet_params = list(map(lambda x: (*x, recipe_id), diet_ids))
         self.sql.executemany("INSERT OR IGNORE INTO recipe_diets(diet_id, recipe_id) VALUES(?,?)", recipe_diet_params)
-        self.connection.commit()
+      
+      self.connection.commit()
 
   def scrape(self) -> None:
     self.logger.debug('Scraping...')
@@ -127,3 +150,4 @@ class WebScraper:
       time.sleep(.25)
     
     self.logger.info(f"Total pages scraped: {page}")
+    self.connection.close()

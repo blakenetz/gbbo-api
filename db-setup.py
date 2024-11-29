@@ -32,7 +32,7 @@ con.execute('''
             img TEXT NOT NULL, 
             difficulty INTEGER,
             is_technical INTEGER NOT NULL,
-            time TEXT, 
+            time int, 
             baker_id INTEGER,
             FOREIGN KEY (baker_id) REFERENCES bakers(id)
             );''')
