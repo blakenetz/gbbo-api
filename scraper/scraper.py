@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup, PageElement, ResultSet
 import time
-import random
 import logging
 import sqlite3
 from typing import List
@@ -12,7 +11,7 @@ class WebScraper:
 
     # Configure logging
     logging.basicConfig(
-      level=logging.DEBUG, 
+      level=logging.INFO, 
       format='🍰 %(asctime)s - %(levelname)s: %(message)s'
     )
     self.logger = logging.getLogger(__name__)
