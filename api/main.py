@@ -79,8 +79,9 @@ def get_recipes(
   diet_ids: Annotated[list[int], Query(description="List of diet ids. Available at GET /diets")] = None,
   difficulty: Annotated[Union[int, None], Query(le=3, ge=1, description="Difficulty on a 1-3 scale")] = None, 
   is_technical: Annotated[Union[bool, None], Query(description="Filter by technical bakes only")] = None, 
+  time: Annotated[Union[int, None], Query(description="Max time in minutes")] = None, 
 ): 
-  statement = select(Recipe, Baker).offset(skip).limit(limit)
+  statement = select(Recipe).offset(skip).limit(limit)
   if (q):
     statement = statement.where(Recipe.title.contains(q))
   if (baker_ids):
@@ -88,9 +89,9 @@ def get_recipes(
   if (difficulty):
     statement = statement.where(Recipe.difficulty == difficulty)
   if (is_technical):
-    statement = statement.where(Recipe.difficulty == is_technical)
-  if (diet_ids):
-    statement = statement.where(Recipe.diets.id.in_(diet_ids))
+    statement = statement.where(Recipe.is_technical == is_technical)
+  if (time):
+    statement = statement.where(Recipe.time <= time)
 
   results = session.exec(statement).all()
   return {"data": list(results)}
