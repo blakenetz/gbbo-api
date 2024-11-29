@@ -1,4 +1,4 @@
-from typing import Annotated, Union
+from typing import Annotated, TypedDict, Union
 from fastapi import FastAPI, HTTPException, Query, Depends
 import logging 
 from sqlmodel import Field, Session, SQLModel, create_engine, select, UniqueConstraint
@@ -79,37 +79,59 @@ def get_recipes(
   diet_ids: Annotated[list[int], Query(description="List of diet ids. Available at GET /diets")] = None,
   difficulty: Annotated[Union[int, None], Query(le=3, ge=1, description="Difficulty on a 1-3 scale")] = None, 
   is_technical: Annotated[Union[bool, None], Query(description="Filter by technical bakes only")] = None, 
-) -> list[Recipe]: 
-  results = session.exec(select(Recipe).offset(skip).limit(limit)).all()
-  return {"data": results}
+): 
+  statement = select(Recipe, Baker).offset(skip).limit(limit)
+  if (q):
+    statement = statement.where(Recipe.title.contains(q))
+  if (baker_ids):
+    statement = statement.where(Recipe.baker_id.in_(baker_ids))
+  if (difficulty):
+    statement = statement.where(Recipe.difficulty == difficulty)
+  if (is_technical):
+    statement = statement.where(Recipe.difficulty == is_technical)
+  if (diet_ids):
+    statement = statement.where(Recipe.diets.id.in_(diet_ids))
+
+  results = session.exec(statement).all()
+  return {"data": list(results)}
 
 @app.get("/recipe/{recipe_id}")
 def get_recipe(recipe_id: int, session: SessionDep):
   result = session.get(Recipe, recipe_id)
-  if not result:
-    raise HTTPException(status_code=404, detail="Recipe not found")
   return {"data": result}
 
 @app.get("/bakers")
-def get_bakers(q: Annotated[Union[str, None], Query(description="Case insensitive search against baker's name")] = None):
-  return {"data": []}
+def get_bakers(
+  session: SessionDep,
+  q: Annotated[Union[str, None], Query(description="Case insensitive search against baker's name")] = None
+):
+  statement = select(Baker)
+  if (q):
+    statement = statement.where(Baker.name.contains(q))
+  
+  results = session.exec(statement).all()
+  return {"data": list(results)}
 
 @app.get("/baker/{baker_id}")
 def get_baker(baker_id: int, session: SessionDep):
   result = session.get(Baker, baker_id)
-  if not result:
-    raise HTTPException(status_code=404, detail="Baker not found")
   return {"data": result}
 
 @app.get("/diets")
-def get_diets(q: Annotated[Union[str, None], Query(description="Case insensitive search against diet title")] = None):
-  return {"data": []}
+def get_diets(
+  session: SessionDep,
+  q: Annotated[Union[str, None], Query(description="Case insensitive search against diet name")] = None
+):
+  statement = select(Diet)
+  if (q):
+    statement = statement.where(Diet.name.contains(q))
+  
+  results = session.exec(statement).all()
+  return {"data": list(results)}
 
 @app.get("/diet/{diet_id}")
 def get_diet(diet_id: int, session: SessionDep):
   result = session.get(Diet, diet_id)
-  if not result:
-    raise HTTPException(status_code=404, detail="Diet not found")
   return {'data': result}
 
 
