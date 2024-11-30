@@ -1,3 +1,11 @@
 {
-  "cSpell.words": ["executemany", "fastapi", "GBBO", "lastrowid", "levelname"]
+  "cSpell.words": [
+    "executemany",
+    "fastapi",
+    "GBBO",
+    "isouter",
+    "lastrowid",
+    "levelname",
+    "selectinload"
+  ]
 }
