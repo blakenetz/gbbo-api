@@ -1,46 +1,12 @@
-from typing import Annotated, Tuple, Union
+from typing import Annotated, Optional
 from fastapi import FastAPI, HTTPException, Query, Depends
 import logging 
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select, UniqueConstraint
 from sqlalchemy.orm import selectinload
 
-class RecipeDiet(SQLModel, table=True, extend_existing=True):
-  __tablename__ = 'recipe_diets'
-  __table_args__ = (UniqueConstraint('recipe_id', 'diet_id'),)
-  id: Union[int, None] = Field(default=None, primary_key=True)
-  recipe_id: int = Field(foreign_key="recipes.id", nullable=False)
-  diet_id: int = Field(foreign_key="diets.id", nullable=False)
-
-class Recipe(SQLModel, table=True, extend_existing=True):
-  __tablename__ = 'recipes'
-  id: Union[int, None] = Field(default=None, primary_key=True)
-  title: str = Field(nullable=False)
-  link: str = Field(nullable=False, unique=True)
-  img: str = Field(nullable=False)
-  difficulty: Union[int, None]
-  is_technical: bool = Field(nullable=False)
-  time: Union[int, None]
-  baker_id: Union[int, None] = Field(default=None, foreign_key="bakers.id")
-  baker: Union['Baker', None] = Relationship(back_populates='recipes')
-  diets: Union[list['Diet'], None] = Relationship(back_populates="recipes", link_model=RecipeDiet)
-
-class Diet(SQLModel, table=True, extend_existing=True):
-  __tablename__ = 'diets'
-  id: Union[int, None] = Field(default=None, primary_key=True)
-  name: str = Field(nullable=False, unique=True)
-  recipes: Union[list['Recipe'], None] = Relationship(back_populates="diets", link_model=RecipeDiet)
-
-class Baker(SQLModel, table=True, extend_existing=True):
-  __tablename__ = 'bakers'
-  __table_args__ = (UniqueConstraint('name', 'img'),)
-  id: Union[int, None] = Field(default=None, primary_key=True)
-  name: str = Field(nullable=False)
-  img: str = Field(nullable=False)
-  recipes: list['Recipe'] = Relationship(back_populates='baker')
-
 # Configure logging
 logging.basicConfig(
-  level=logging.DEBUG, 
+  level=logging.INFO, 
   format='🍰 %(asctime)s - %(levelname)s: %(message)s',
 )
 logger = logging.getLogger(__name__)
@@ -50,6 +16,43 @@ sqlite_file_name = "gbbo.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 connect_args = {"check_same_thread": False}
 engine = create_engine(sqlite_url, connect_args=connect_args, echo=True)
+
+class RecipeDiet(SQLModel, table=True, extend_existing=True):
+  __tablename__ = 'recipe_diets'
+  __table_args__ = (UniqueConstraint('recipe_id', 'diet_id'),)
+  id: Optional[int] = Field(default=None, primary_key=True)
+  recipe_id: int = Field(foreign_key="recipes.id", nullable=False)
+  diet_id: int = Field(foreign_key="diets.id", nullable=False)
+
+class Recipe(SQLModel, table=True, extend_existing=True):
+  __tablename__ = 'recipes'
+  id: Optional[int] = Field(default=None, primary_key=True)
+  title: str = Field(nullable=False)
+  link: str = Field(nullable=False, unique=True)
+  img: str = Field(nullable=False)
+  difficulty: Optional[int]
+  is_technical: bool = Field(nullable=False)
+  time: Optional[int]
+  baker_id: Optional[int] = Field(default=None, foreign_key="bakers.id")
+  baker: Optional['Baker'] = Relationship(back_populates='recipes')
+  diets: Optional[list['Diet']] = Relationship(back_populates="recipes", link_model=RecipeDiet)
+
+class Diet(SQLModel, table=True, extend_existing=True):
+  __tablename__ = 'diets'
+  id: Optional[int] = Field(default=None, primary_key=True)
+  name: str = Field(nullable=False, unique=True)
+  recipes: Optional[list['Recipe']] = Relationship(back_populates="diets", link_model=RecipeDiet)
+
+class Baker(SQLModel, table=True, extend_existing=True):
+  __tablename__ = 'bakers'
+  __table_args__ = (UniqueConstraint('name', 'img'),)
+  id: Optional[int] = Field(default=None, primary_key=True)
+  name: str = Field(nullable=False)
+  img: str = Field(nullable=False)
+  recipes: list['Recipe'] = Relationship(back_populates='baker')
+
+
+
 
 def parse_recipe(db_result: Recipe):
   data = db_result.model_dump(exclude={'baker_id'})
@@ -80,12 +83,12 @@ def read_root():
 @app.get("/recipes")
 def get_recipes(
   session: SessionDep,
-  limit: Union[int, None] = 50,
-  skip: Union[int, None] = 0,
-  q: Annotated[Union[str, None], Query(description="Case insensitive search against recipe title")] = None,
-  difficulty: Annotated[Union[int, None], Query(le=3, ge=1, description="Difficulty on a 1-3 scale")] = None,
-  is_technical: Annotated[Union[bool, None], Query(description="Filter by technical bakes only")] = None,
-  time: Annotated[Union[int, None], Query(description="Max time in minutes")] = None,
+  limit: Optional[int] = 50,
+  skip: Optional[int] = 0,
+  q: Annotated[Optional[str], Query(description="Case insensitive search against recipe title")] = None,
+  difficulty: Annotated[Optional[int], Query(le=3, ge=1, description="Difficulty on a 1-3 scale")] = None,
+  is_technical: Annotated[Optional[bool], Query(description="Filter by technical bakes only")] = None,
+  time: Annotated[Optional[int], Query(description="Max time in minutes")] = None,
   baker_ids: Annotated[list[int], Query(description="List of baker ids. Available at GET /bakers")] = None,
   diet_ids: Annotated[list[int], Query(description="List of diet ids. Available at GET /diets")] = None,
 ): 
@@ -151,10 +154,10 @@ def get_recipe(recipe_id: int, session: SessionDep):
 @app.get("/bakers")
 def get_bakers(
   session: SessionDep,
-  q: Annotated[Union[str, None], Query(description="Case insensitive search against baker's name")] = None
+  q: Annotated[Optional[str], Query(description="Case insensitive search against baker's name")] = None
 ):
   statement = select(Baker)
-  if (q):
+  if q:
     statement = statement.where(Baker.name.contains(q))
   
   results = session.exec(statement).all()
@@ -168,10 +171,10 @@ def get_baker(baker_id: int, session: SessionDep):
 @app.get("/diets")
 def get_diets(
   session: SessionDep,
-  q: Annotated[Union[str, None], Query(description="Case insensitive search against diet name")] = None
+  q: Annotated[Optional[str], Query(description="Case insensitive search against diet name")] = None
 ):
   statement = select(Diet)
-  if (q):
+  if q:
     statement = statement.where(Diet.name.contains(q))
   
   results = session.exec(statement).all()
