@@ -1,7 +1,8 @@
-from typing import Annotated, Union
+from typing import Annotated, Tuple, Union
 from fastapi import FastAPI, HTTPException, Query, Depends
 import logging 
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select, UniqueConstraint
+from sqlalchemy.orm import selectinload
 
 class RecipeDiet(SQLModel, table=True, extend_existing=True):
   __tablename__ = 'recipe_diets'
@@ -21,13 +22,13 @@ class Recipe(SQLModel, table=True, extend_existing=True):
   time: Union[int, None]
   baker_id: Union[int, None] = Field(default=None, foreign_key="bakers.id")
   baker: Union['Baker', None] = Relationship(back_populates='recipes')
-  # diets: Union[list['Diet'], None] = Relationship(back_populates="recipes", link_model=RecipeDiet)
+  diets: Union[list['Diet'], None] = Relationship(back_populates="recipes", link_model=RecipeDiet)
 
 class Diet(SQLModel, table=True, extend_existing=True):
   __tablename__ = 'diets'
   id: Union[int, None] = Field(default=None, primary_key=True)
   name: str = Field(nullable=False, unique=True)
-  # recipes: Union[list['Recipe'], None] = Relationship(back_populates="diets", link_model=RecipeDiet)
+  recipes: Union[list['Recipe'], None] = Relationship(back_populates="diets", link_model=RecipeDiet)
 
 class Baker(SQLModel, table=True, extend_existing=True):
   __tablename__ = 'bakers'
@@ -50,17 +51,19 @@ sqlite_url = f"sqlite:///{sqlite_file_name}"
 connect_args = {"check_same_thread": False}
 engine = create_engine(sqlite_url, connect_args=connect_args, echo=True)
 
+def parse_recipe(db_result: Recipe):
+  data = db_result.model_dump(exclude={'baker_id'})
+  data['baker'] = db_result.baker.model_dump(exclude={"recipes"}) if db_result.baker else None
+  data['diet'] = db_result.diets
+  
+  return data
+
 def create_db_and_tables():
   SQLModel.metadata.create_all(engine)
 
 def get_session():
   with Session(engine) as session:
     yield session
-
-def parse_recipe(recipe: Recipe, baker: Baker):
-  data = recipe.model_dump(exclude={'baker_id'})
-  data['baker'] = baker.model_dump(exclude={"recipes"}) if baker else None
-  return data
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -86,37 +89,62 @@ def get_recipes(
   baker_ids: Annotated[list[int], Query(description="List of baker ids. Available at GET /bakers")] = None,
   diet_ids: Annotated[list[int], Query(description="List of diet ids. Available at GET /diets")] = None,
 ): 
-  statement = select(Recipe, Baker).join(Baker, isouter=True).offset(skip).limit(limit)
+  statement = (
+    select(Recipe)
+    .options(
+      selectinload(Recipe.baker),
+      selectinload(Recipe.diets)
+    )
+    .offset(skip)
+    .limit(limit)
+  )
   
-  if (q):
+  if q:
     statement = statement.where(Recipe.title.contains(q))
-  if (difficulty):
+  if difficulty:
     statement = statement.where(Recipe.difficulty == difficulty)
-  if (is_technical):
+  if is_technical:
     statement = statement.where(Recipe.is_technical == is_technical)
-  if (time):
+  if time:
     statement = statement.where(Recipe.time <= time)
-  if (baker_ids):
+  if baker_ids:
     statement = statement.where(Recipe.baker_id.in_(baker_ids))
+  if diet_ids:
+    statement = (
+      statement
+      .join(RecipeDiet, RecipeDiet.recipe_id == Recipe.id)
+      .where(RecipeDiet.diet_id.in_(diet_ids))
+      .distinct()
+    )
 
   results = session.exec(statement).all()
+  
+  if not results:
+    raise HTTPException(status_code=404, detail="Recipes not found")
+  
   data = []
-  for recipe, baker in results:
-    recipe_data = parse_recipe(recipe, baker)
+  for result in results:
+    recipe_data = parse_recipe(result)
     data.append(recipe_data)
 
   return data
 
 @app.get("/recipe/{recipe_id}")
 def get_recipe(recipe_id: int, session: SessionDep):
-  statement = select(Recipe, Baker).where(Recipe.id == recipe_id).join(Baker, isouter=True)
+  statement = (
+    select(Recipe)
+    .options(
+      selectinload(Recipe.baker),
+      selectinload(Recipe.diets)
+    )
+    .where(Recipe.id == recipe_id)
+  )
   result = session.exec(statement).first()
   
   if not result:
     raise HTTPException(status_code=404, detail="Recipe not found")
   
-  recipe, baker = result
-  data = parse_recipe(recipe, baker)
+  data = parse_recipe(result)
 
   return data
 
