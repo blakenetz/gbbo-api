@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 import uvicorn
 from db import create_db_and_tables
@@ -16,6 +17,15 @@ app = FastAPI(
   title="GBBO Recipe API",
   description="Unofficial API for Great British Bake Off Recipes",
   version="0.1.0"
+)
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include API routers

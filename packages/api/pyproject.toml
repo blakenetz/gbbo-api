@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "gbbo-api"
+version = "0.1.0"
+description = "GBBO Recipe API"
+authors = ["Blake Netzeband <blake.netzeband@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.104.0"
+uvicorn = "^0.24.0"
+sqlalchemy = "^2.0.23"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.scripts]
+init-db = "scripts.init_db:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api" 
