@@ -1,18 +1,20 @@
 [tool.poetry]
-name = "gbbo-api"
+name = "gbbo-scraper"
 version = "0.1.0"
-description = "GBBO Recipe API"
+description = "GBBO Recipe Scraper"
 authors = ["Blake Netzeband <blake.netzeband@gmail.com>"]
 readme = "../../README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.9"
-fastapi = "^0.104.0"
-uvicorn = "^0.24.0"
-sqlalchemy = "^2.0.23"
-python-dotenv = "^1.0.0"
-sqlmodel = "^0.0.14"
+dateparser = "^1.2.0"
+requests = "^2.32.3"
+beautifulsoup4 = "^4.12.3"
+
+[tool.poetry.scripts]
+init-db = "db-setup:main"
+scrape = "main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

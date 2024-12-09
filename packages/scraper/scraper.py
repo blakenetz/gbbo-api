@@ -1,4 +1,3 @@
-import dateparser
 import requests
 from bs4 import BeautifulSoup, PageElement, ResultSet
 import time

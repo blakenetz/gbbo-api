@@ -1,0 +1,10 @@
+{
+  "name": "@gbbo/scraper",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "poetry": "poetry",
+    "scrape": "poetry run scrape",
+    "setup": "poetry run init-db"
+  }
+}
