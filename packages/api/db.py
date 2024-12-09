@@ -1,10 +1,14 @@
 from typing import Annotated
 from fastapi import Depends
 from sqlmodel import Session, SQLModel, create_engine
+import os
 
 # Config DB connection
-sqlite_file_name = "gbbo.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
+current_dir = os.path.abspath(os.path.dirname(__file__))
+db_file = os.path.join(current_dir, "../..", "gbbo.db")
+
+print(db_file)
+sqlite_url = f"sqlite:///{db_file}"
 connect_args = {"check_same_thread": False}
 
 engine = create_engine(sqlite_url, connect_args=connect_args, echo=True)

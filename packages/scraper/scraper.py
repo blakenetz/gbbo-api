@@ -1,10 +1,11 @@
 import requests
 from bs4 import BeautifulSoup, PageElement, ResultSet
 import time
-import logging
 import sqlite3
 from typing import List
 import re
+
+from util import get_logger, get_db_file_path
 
 def parse_time_to_minutes(time_str):
   pattern = r"(\d+)\s*(d|h|m)"
@@ -29,16 +30,15 @@ class WebScraper:
     self.base_url = "https://thegreatbritishbakeoff.co.uk/recipes/all/"
 
     # Configure logging
-    logging.basicConfig(
-      level=logging.INFO, 
-      format='🍰 %(asctime)s - %(levelname)s: %(message)s'
-    )
-    self.logger = logging.getLogger(__name__)
+    self.logger = get_logger(__name__)
     self.logger.debug('Initializing...')
 
     # Config DB connection
-    self.connection = sqlite3.connect("gbbo.db")
+    db_file = get_db_file_path()
+    self.connection = sqlite3.connect(db_file)
     self.sql = self.connection.cursor()
+
+    # uncomment to enable sql trace
     # self.connection.set_trace_callback(print)
 
   def _generate_page_url(self, page_number: int) -> str:

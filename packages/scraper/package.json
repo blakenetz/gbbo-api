@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "poetry": "poetry",
-    "scrape": "poetry run scrape",
-    "setup": "poetry run init-db"
+    "scrape": "poetry run python main.py",
+    "setup": "poetry run python db-setup.py"
   }
 }

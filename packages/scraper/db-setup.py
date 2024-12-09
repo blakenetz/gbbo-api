@@ -1,11 +1,22 @@
 import sqlite3
+import os
 
-con = sqlite3.connect("gbbo.db")
+from util import get_logger, get_db_file_path
+
+logger = get_logger(__name__)
+database_file = get_db_file_path()
+
+logger.debug(f"Setting up database in {database_file}...")
+con = sqlite3.connect(database_file)
+
+logger.debug("Dropping tables...")
 
 con.execute('DROP TABLE IF EXISTS recipe_diets;')
 con.execute('DROP TABLE IF EXISTS recipes;')
 con.execute('DROP TABLE IF EXISTS diets;')
 con.execute('DROP TABLE IF EXISTS bakers;')
+
+logger.debug("Creating tables...")
 
 con.execute('''
             CREATE TABLE bakers 
@@ -48,4 +59,5 @@ con.execute('''
             UNIQUE(recipe_id, diet_id)
             );''')
 
+logger.debug("Finished!")
 
