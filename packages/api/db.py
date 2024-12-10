@@ -7,7 +7,6 @@ import os
 current_dir = os.path.abspath(os.path.dirname(__file__))
 db_file = os.path.join(current_dir, "../..", "gbbo.db")
 
-print(db_file)
 sqlite_url = f"sqlite:///{db_file}"
 connect_args = {"check_same_thread": False}
 

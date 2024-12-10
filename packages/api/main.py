@@ -1,16 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
 import uvicorn
 from db import create_db_and_tables
-from routes import recipe_router, diet_router, baker_router 
+from routes import recipe_router, diet_router, baker_router
+from util import get_logger 
 
-# Configure logging
-logging.basicConfig(
-  level=logging.INFO, 
-  format='🍰 %(asctime)s - %(levelname)s: %(message)s',
-)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # FastAPI Setup
 app = FastAPI(
@@ -29,9 +24,9 @@ app.add_middleware(
 )
 
 # Include API routers
-app.include_router(recipe_router, tags=["recipes"])
-app.include_router(baker_router, tags=["bakers"])
-app.include_router(diet_router, tags=["diets"])
+app.include_router(recipe_router, prefix='/recipe', tags=['recipe'])
+app.include_router(baker_router, prefix="/baker", tags=['baker'])
+app.include_router(diet_router, prefix="/diet", tags=['diet'])
 
 @app.on_event("startup")
 def on_startup():
