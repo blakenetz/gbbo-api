@@ -1,4 +1,3 @@
-"use client";
 import { Recipe } from "@/types";
 import {
   Card as MantineCard,
@@ -20,15 +19,15 @@ import { Diet } from "@/components";
 
 export default function Card({ recipe }: CardProps) {
   return (
-    <MantineCard shadow="sm" radius="md" className={styles.card} padding="xs">
-      <MantineCard.Section className={styles.image}>
+    <MantineCard shadow="sm" radius="md" className={styles.card} padding={0}>
+      <div className={styles.image}>
         <Image src={recipe.img} height={160} alt={recipe.title} />
         {recipe.baker?.id && (
           <Avatar src={recipe.baker.img} className={styles.avatar} />
         )}
-      </MantineCard.Section>
+      </div>
 
-      <MantineCard.Section className={styles.content}>
+      <div className={styles.content}>
         <Text fw={500} className={styles.title}>
           {recipe.title}
         </Text>
@@ -71,10 +70,10 @@ export default function Card({ recipe }: CardProps) {
             fullWidth
             color="gray"
           >
-            View recipe on GBBP
+            View recipe on GBBO
           </Button>
         </Flex>
-      </MantineCard.Section>
+      </div>
     </MantineCard>
   );
 }

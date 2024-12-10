@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { ColorSchemeScript, MantineProvider, Flex } from "@mantine/core";
 import "@mantine/core/styles.css";
-import { ColorSchemeScript, MantineProvider } from "@mantine/core";
+import styles from "./layout.module.css";
 
 export const metadata: Metadata = {
   title: "GBBO Search",
@@ -23,7 +24,24 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider>
+          <Flex
+            className={styles.root}
+            component="section"
+            justify="center"
+            align="flex-start"
+          >
+            <Flex
+              className={styles.container}
+              direction="column"
+              gap="md"
+              align="center"
+              justify="center"
+            >
+              {children}
+            </Flex>
+          </Flex>
+        </MantineProvider>
       </body>
     </html>
   );

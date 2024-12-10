@@ -1,5 +1,4 @@
-import { Flex, SimpleGrid, Text, TextInput, Title } from "@mantine/core";
-import styles from "./page.module.css";
+import { SimpleGrid, Text, TextInput, Title } from "@mantine/core";
 import { redirect } from "next/navigation";
 import { fetchRandomRecipe } from "./actions";
 import { Card } from "@/components";
@@ -18,33 +17,20 @@ export default async function Home() {
   }
 
   return (
-    <Flex
-      className={styles.root}
-      component="section"
-      justify="center"
-      align="flex-start"
-    >
-      <Flex
-        className={styles.container}
-        direction="column"
-        gap="md"
-        align="center"
-        justify="center"
-      >
-        <Title>GBBO Search</Title>
-        <Text>A new way to search for Great British Bake Off recipes</Text>
-        <form action={handleSubmit}>
-          <TextInput placeholder="Search for a recipe" name="q" />
-        </form>
+    <>
+      <Title>GBBO Search</Title>
+      <Text>A new way to search for Great British Bake Off recipes</Text>
+      <form action={handleSubmit}>
+        <TextInput placeholder="Search for a recipe" name="q" />
+      </form>
 
-        <Text>Need some inspiration...</Text>
+      <Text>Need some inspiration...</Text>
 
-        <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="xs" mt="xl">
-          {recipes.map((recipe) => (
-            <Card key={recipe.id} recipe={recipe} />
-          ))}
-        </SimpleGrid>
-      </Flex>
-    </Flex>
+      <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="xs" mt="xl">
+        {recipes.map((recipe) => (
+          <Card key={recipe.id} recipe={recipe} />
+        ))}
+      </SimpleGrid>
+    </>
   );
 }
