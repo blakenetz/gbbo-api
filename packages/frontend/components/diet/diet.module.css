@@ -1,0 +1,3 @@
+.icon {
+  padding: calc(var(--mantine-spacing-xs) / 4);
+}

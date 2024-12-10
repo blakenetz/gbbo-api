@@ -1,0 +1,39 @@
+.card {
+  max-width: 300px;
+  @media (max-width: $mantine-breakpoint-sm) {
+    max-width: 100%;
+  }
+}
+
+.image {
+  display: relative;
+  position: relative;
+}
+
+.avatar {
+  position: absolute;
+  top: var(--mantine-spacing-xs);
+  right: var(--mantine-spacing-xs);
+}
+
+.title {
+  margin-top: var(--mantine-spacing-sm);
+  margin-bottom: var(--mantine-spacing-sm);
+  text-align: center;
+}
+
+.star {
+  color: var(--mantine-color-yellow-filled);
+}
+
+.star[data-filled="true"] {
+  fill: currentColor;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-xs);
+  height: 100%;
+}
