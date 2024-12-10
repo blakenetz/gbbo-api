@@ -62,7 +62,7 @@ def get_diets(
 
 @diet_router.get("/count")
 def get_diet_count(session: SessionDep):
-  return GenericService.get_item_count(Baker, session)
+  return GenericService.get_item_count(Diet, session)
 
 @diet_router.get("/{diet_id}")
 def get_diet_by_id(diet_id: int, session: SessionDep):
