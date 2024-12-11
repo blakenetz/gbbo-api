@@ -7,9 +7,12 @@ import {
   Badge,
   Avatar,
   Button,
+  MantineColor,
+  ThemeIcon,
+  Tooltip,
 } from "@mantine/core";
 import styles from "./card.module.css";
-import { Star } from "lucide-react";
+import { CakeSlice, Croissant, Cake, LucideIcon } from "lucide-react";
 
 interface CardProps {
   recipe: Recipe;
@@ -17,13 +20,29 @@ interface CardProps {
 
 import { Diet } from "@/components";
 
+const difficulties: { icon: LucideIcon; label: string; color: MantineColor }[] =
+  [
+    { icon: CakeSlice, label: "Easy", color: "green.9" },
+    { icon: Cake, label: "Medium", color: "yellow.9" },
+    { icon: Croissant, label: "Hard", color: "red.9" },
+  ];
+
 export default function Card({ recipe }: CardProps) {
+  const difficulty = recipe.difficulty ? difficulties[recipe.difficulty] : null;
+
   return (
     <MantineCard shadow="sm" radius="md" className={styles.card} padding={0}>
       <div className={styles.image}>
         <Image src={recipe.img} height={160} alt={recipe.title} />
         {recipe.baker?.id && (
-          <Avatar src={recipe.baker.img} className={styles.avatar} />
+          <Tooltip label={recipe.baker.name} position="bottom">
+            <Avatar
+              src={recipe.baker.img}
+              className={styles.avatar}
+              component="a"
+              href={`/search?baker_ids=${recipe.baker.id}`}
+            />
+          </Tooltip>
         )}
       </div>
 
@@ -34,31 +53,37 @@ export default function Card({ recipe }: CardProps) {
 
         <Flex direction="column" gap="xs">
           <Flex gap="xs" align="center" justify="space-between" px="xs">
-            <Flex>
-              {recipe.difficulty &&
-                Array.from({ length: 3 }, (_, index) => (
-                  <Star
-                    key={index}
-                    className={styles.star}
-                    data-filled={index <= (recipe.difficulty ?? 0)}
-                  />
-                ))}
-            </Flex>
+            {difficulty ? (
+              <Flex align="center" gap="xs">
+                <ThemeIcon color={difficulty.color} size="sm" variant="white">
+                  <difficulty.icon />
+                </ThemeIcon>
+                <Text c={difficulty.color}>{difficulty.label}</Text>
+              </Flex>
+            ) : (
+              <span />
+            )}
 
             {recipe.is_technical && (
-              <Badge color="red" className={styles.badge}>
+              <Badge
+                color="orange"
+                size="lg"
+                variant="gradient"
+                gradient={{ from: "yellow", to: "red", deg: 330 }}
+                radius="xs"
+              >
                 Technical
               </Badge>
             )}
-
-            {recipe.diet.length > 0 && (
-              <Flex gap="xs">
-                {recipe.diet.map((diet) => (
-                  <Diet diet={diet} key={diet.id} />
-                ))}
-              </Flex>
-            )}
           </Flex>
+
+          {recipe.diet.length > 0 && (
+            <Flex gap="xs" px="xs">
+              {recipe.diet.map((diet) => (
+                <Diet diet={diet} key={diet.id} />
+              ))}
+            </Flex>
+          )}
 
           <Button
             component="a"

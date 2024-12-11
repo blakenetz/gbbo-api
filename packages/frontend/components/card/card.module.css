@@ -22,14 +22,6 @@
   text-align: center;
 }
 
-.star {
-  color: var(--mantine-color-yellow-filled);
-}
-
-.star[data-filled="true"] {
-  fill: currentColor;
-}
-
 .content {
   display: flex;
   flex-direction: column;

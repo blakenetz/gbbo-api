@@ -20,11 +20,11 @@ export default function Diet({ diet }: DietProps) {
   const { Icon, color } = icons[diet.name];
 
   return (
-    <Tooltip label={diet.name}>
+    <Tooltip label={diet.name} position="bottom">
       <ThemeIcon
         className={styles.icon}
         radius="xl"
-        size="sm"
+        size="md"
         aria-label={diet.name}
         autoContrast
         color={color}
