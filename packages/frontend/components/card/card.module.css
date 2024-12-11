@@ -29,3 +29,7 @@
   gap: var(--mantine-spacing-xs);
   height: 100%;
 }
+
+.xxsGap {
+  gap: calc(var(--mantine-spacing-xs) / 2);
+}
