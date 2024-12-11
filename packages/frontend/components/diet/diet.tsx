@@ -1,7 +1,8 @@
 import { Diet as DietType } from "@/types";
 import { WheatOff, MilkOff, LeafyGreen, Vegan } from "lucide-react";
-import { ThemeIcon, MantineColor, Tooltip } from "@mantine/core";
+import { MantineColor, Tooltip, ActionIcon } from "@mantine/core";
 import styles from "./diet.module.css";
+import Link from "next/link";
 interface DietProps {
   diet: DietType;
 }
@@ -21,17 +22,18 @@ export default function Diet({ diet }: DietProps) {
 
   return (
     <Tooltip label={diet.name} position="bottom">
-      <ThemeIcon
+      <ActionIcon
         className={styles.icon}
         radius="xl"
         size="md"
         aria-label={diet.name}
-        autoContrast
         color={color}
-        variant="white"
+        variant="subtle"
+        component={Link}
+        href={`/search?diet_ids=${diet.id}`}
       >
         <Icon />
-      </ThemeIcon>
+      </ActionIcon>
     </Tooltip>
   );
 }

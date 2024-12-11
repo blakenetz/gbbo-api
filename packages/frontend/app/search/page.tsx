@@ -1,12 +1,15 @@
 import { SimpleGrid } from "@mantine/core";
 import { fetchRecipeByQuery } from "./actions";
 import { Card } from "@/components";
-export default async function SearchPage({
-  searchParams,
-}: {
-  searchParams: { q: string };
-}) {
-  const recipes = await fetchRecipeByQuery(searchParams.q);
+import { RecipeSearchParams } from "@/types";
+
+interface SearchPageProps {
+  searchParams: Promise<RecipeSearchParams>;
+}
+
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const params = await searchParams;
+  const recipes = await fetchRecipeByQuery(params);
 
   return (
     <SimpleGrid

@@ -10,6 +10,20 @@ export interface Recipe {
   diet: Diet[];
 }
 
+type RecipeSearchParamsKeys =
+  | "limit"
+  | "skip"
+  | "q"
+  | "difficulty"
+  | "is_technical"
+  | "time"
+  | "baker_ids"
+  | "diet_ids";
+
+export type RecipeSearchParams = Partial<
+  Record<RecipeSearchParamsKeys, string>
+>;
+
 export interface Baker {
   id: number;
   name: string;
