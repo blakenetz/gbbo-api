@@ -10,7 +10,10 @@ db_file = os.path.join(current_dir, "../..", "gbbo.db")
 sqlite_url = f"sqlite:///{db_file}"
 connect_args = {"check_same_thread": False}
 
-engine = create_engine(sqlite_url, connect_args=connect_args, echo=True)
+engine = create_engine(sqlite_url, 
+                       connect_args=connect_args, 
+                      #  echo=True
+                       )
 
 # DB helper functions and types
 def create_db_and_tables():

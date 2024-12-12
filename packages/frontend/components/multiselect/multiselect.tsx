@@ -7,12 +7,17 @@ import {
   Pill,
   PillsInput,
   useCombobox,
+  Group,
+  Text,
 } from "@mantine/core";
 import { BaseModel } from "@/types";
+import { capitalize } from "lodash";
+import classes from "./multiselect.module.css";
 
 interface SearchableMultiSelectProps {
-  data: (BaseModel & { img?: string })[];
+  data: (BaseModel & { icon: React.ReactNode })[];
   name: string;
+  defaultValues?: string[];
 }
 
 /**
@@ -22,6 +27,7 @@ interface SearchableMultiSelectProps {
 export default function SearchableMultiSelect({
   data,
   name,
+  defaultValues = [],
 }: SearchableMultiSelectProps) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
@@ -29,7 +35,7 @@ export default function SearchableMultiSelect({
   });
 
   const [search, setSearch] = useState("");
-  const [values, setValues] = useState<string[]>([]); // list of selected ids
+  const [values, setValues] = useState<string[]>(defaultValues); // list of selected ids
 
   const handleValueSelect: ComboboxProps["onOptionSubmit"] = (val) => {
     setValues((c) =>
@@ -57,7 +63,7 @@ export default function SearchableMultiSelect({
 
   // break data into Pill and Combobox.Option elements
   const { Pills, Options } = data.reduce<
-    Record<"Pills" | "Options", JSX.Element[]>
+    Record<"Pills" | "Options", React.ReactNode[]>
   >(
     (acc, item) => {
       const id = `${item.id}`;
@@ -75,7 +81,10 @@ export default function SearchableMultiSelect({
       else if (item.name.toLowerCase().includes(search.trim().toLowerCase())) {
         acc.Options.push(
           <Combobox.Option value={id} key={id}>
-            {item.name}
+            <Group>
+              {item.icon}
+              <Text size="sm">{item.name}</Text>
+            </Group>
           </Combobox.Option>
         );
       }
@@ -93,7 +102,10 @@ export default function SearchableMultiSelect({
     >
       <input type="hidden" name={name} value={values} />
       <Combobox.DropdownTarget>
-        <PillsInput onClick={() => combobox.openDropdown()}>
+        <PillsInput
+          onClick={() => combobox.openDropdown()}
+          label={capitalize(name)}
+        >
           <Pill.Group>
             {Pills}
             <Combobox.EventsTarget>
@@ -111,7 +123,7 @@ export default function SearchableMultiSelect({
         </PillsInput>
       </Combobox.DropdownTarget>
 
-      <Combobox.Dropdown>
+      <Combobox.Dropdown className={classes.dropdown}>
         <Combobox.Options>
           {Options.length > 0 ? (
             Options

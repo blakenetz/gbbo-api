@@ -1,11 +1,19 @@
 import { Diet as DietType } from "@/types";
 import { WheatOff, MilkOff, LeafyGreen, Vegan } from "lucide-react";
-import { MantineColor, Tooltip, ActionIcon } from "@mantine/core";
+import {
+  MantineColor,
+  Tooltip,
+  ActionIcon,
+  ActionIconProps,
+  createPolymorphicComponent,
+} from "@mantine/core";
 import styles from "./diet.module.css";
 import Link from "next/link";
 interface DietProps {
   diet: DietType;
 }
+
+interface DietIconProps extends DietProps, ActionIconProps {}
 
 const icons: Record<
   DietType["name"],
@@ -17,11 +25,10 @@ const icons: Record<
   Vegan: { Icon: Vegan, color: "teal" },
 };
 
-export default function Diet({ diet }: DietProps) {
-  const { Icon, color } = icons[diet.name];
-
-  return (
-    <Tooltip label={diet.name} position="bottom">
+export const DietIcon = createPolymorphicComponent<"button", DietIconProps>(
+  ({ diet, ...props }: DietIconProps) => {
+    const { Icon, color } = icons[diet.name];
+    return (
       <ActionIcon
         className={styles.icon}
         radius="xl"
@@ -29,11 +36,22 @@ export default function Diet({ diet }: DietProps) {
         aria-label={diet.name}
         color={color}
         variant="subtle"
-        component={Link}
-        href={`/search?diet_ids=${diet.id}`}
+        {...props}
       >
         <Icon />
       </ActionIcon>
+    );
+  }
+);
+
+export default function Diet({ diet }: DietIconProps) {
+  return (
+    <Tooltip label={diet.name} position="bottom">
+      <DietIcon
+        diet={diet}
+        component={Link}
+        href={`/search?diet_ids=${diet.id}`}
+      />
     </Tooltip>
   );
 }

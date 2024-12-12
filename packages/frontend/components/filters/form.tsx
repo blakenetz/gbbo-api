@@ -2,7 +2,23 @@
 
 import { Multiselect } from "@/components";
 import { Baker, Diet } from "@/types";
-import { Title, Button } from "@mantine/core";
+import {
+  ActionIcon,
+  Avatar,
+  Button,
+  Checkbox,
+  Flex,
+  Group,
+  Radio,
+  Slider,
+  Switch,
+  TextInput,
+  Tooltip,
+} from "@mantine/core";
+import { RotateCcw } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { submitFilters } from "./actions";
 
 export default function FilterForm({
   bakers,
@@ -11,27 +27,96 @@ export default function FilterForm({
   bakers: Baker[];
   diets: Diet[];
 }) {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const bakers = formData.get("bakers");
-    const diets = formData.get("diets");
-    console.log(formData);
-    console.log(bakers);
-    console.log(diets);
-  };
+  const searchParams = useSearchParams();
+  const [time, setTime] = useState(Number(searchParams.get("time")) || 0);
+
+  const bakersWithIcons = bakers.map((baker) => ({
+    ...baker,
+    icon: <Avatar src={baker.img} alt={baker.name} size="sm" />,
+  }));
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Title order={5} component="p">
-        Bakers
-      </Title>
-      <Multiselect data={bakers} name="bakers" />
-      <Title order={5} component="p">
-        Diets
-      </Title>
-      <Multiselect data={diets} name="diets" />
-      <Button type="submit">Submit</Button>
-    </form>
+    <Flex
+      direction="column"
+      gap="xl"
+      mt="md"
+      component="form"
+      action={submitFilters}
+    >
+      <TextInput
+        name="q"
+        label="Recipe name"
+        defaultValue={searchParams.get("q") ?? ""}
+      />
+
+      <Switch
+        name="is_technical"
+        label="Technical"
+        defaultChecked={searchParams.get("is_technical") === "on"}
+      />
+
+      <Radio.Group
+        defaultValue={searchParams.get("difficulty") ?? ""}
+        label="Difficulty"
+        name="difficulty"
+      >
+        <Group mt="xs">
+          <Radio value="1" label="Easy" />
+          <Radio value="2" label="Medium" />
+          <Radio value="3" label="Hard" />
+        </Group>
+      </Radio.Group>
+
+      <Group mt="xs">
+        <Slider
+          flex={1}
+          name="time"
+          label={null}
+          max={240}
+          value={time}
+          onChange={setTime}
+          marks={[
+            { value: 60, label: "1h" },
+            { value: 120, label: "2h" },
+            { value: 180, label: "3h" },
+            { value: 240, label: "4h" },
+          ]}
+        />
+        <Tooltip label="Reset">
+          <ActionIcon
+            onClick={() => setTime(0)}
+            variant="subtle"
+            radius="xl"
+            size="xs"
+          >
+            <RotateCcw />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+
+      <Checkbox.Group
+        label="Diets"
+        defaultValue={searchParams.get("diet_ids")?.split(",") ?? []}
+      >
+        <Group mt="xs">
+          {diets.map((diet) => (
+            <Checkbox
+              key={diet.id}
+              value={diet.id.toString()}
+              label={diet.name}
+              name="diets"
+            />
+          ))}
+        </Group>
+      </Checkbox.Group>
+
+      <Multiselect
+        data={bakersWithIcons}
+        name="bakers"
+        defaultValues={searchParams.get("baker_ids")?.split(",") ?? []}
+      />
+
+      <Button type="submit">Filter</Button>
+    </Flex>
   );
 }
