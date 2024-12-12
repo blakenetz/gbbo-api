@@ -16,5 +16,6 @@ export async function fetchRecipeByQuery(
   }
 
   const response = await fetch(`${API_URL}/recipe?${queryParams.toString()}`);
+
   return response.json();
 }

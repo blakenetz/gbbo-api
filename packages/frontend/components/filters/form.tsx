@@ -9,7 +9,7 @@ import {
   Checkbox,
   Flex,
   Group,
-  Radio,
+  Select,
   Slider,
   Switch,
   TextInput,
@@ -55,19 +55,20 @@ export default function FilterForm({
         defaultChecked={searchParams.get("is_technical") === "on"}
       />
 
-      <Radio.Group
+      <Select
         defaultValue={searchParams.get("difficulty") ?? ""}
         label="Difficulty"
         name="difficulty"
-      >
-        <Group mt="xs">
-          <Radio value="1" label="Easy" />
-          <Radio value="2" label="Medium" />
-          <Radio value="3" label="Hard" />
-        </Group>
-      </Radio.Group>
+        placeholder="Select difficulty"
+        data={[
+          { value: "1", label: "Easy" },
+          { value: "2", label: "Medium" },
+          { value: "3", label: "Hard" },
+        ]}
+        clearable
+      />
 
-      <Group mt="xs">
+      <Group>
         <Slider
           flex={1}
           name="time"

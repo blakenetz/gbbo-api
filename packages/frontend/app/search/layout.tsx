@@ -6,6 +6,7 @@ import {
   AppShellNavbar,
   Burger,
   Group,
+  SimpleGrid,
   Title,
 } from "@mantine/core";
 import { ChefHat } from "lucide-react";
@@ -29,7 +30,15 @@ export default function SearchLayout({ children }: React.PropsWithChildren) {
       <AppShellNavbar p="md" component="aside">
         <Filters />
       </AppShellNavbar>
-      <AppShellMain>{children}</AppShellMain>
+      <AppShellMain>
+        <SimpleGrid
+          cols={{ xs: 2, sm: 3, lg: 4 }}
+          spacing="xs"
+          p={{ base: 0, xs: "xs" }}
+        >
+          {children}
+        </SimpleGrid>
+      </AppShellMain>
     </AppShell>
   );
 }
