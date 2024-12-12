@@ -24,13 +24,13 @@ export type RecipeSearchParams = Partial<
   Record<RecipeSearchParamsKeys, string>
 >;
 
-export interface Baker {
+export interface BaseModel {
   id: number;
   name: string;
+}
+
+export interface Baker extends BaseModel {
   img: string;
 }
 
-export interface Diet {
-  id: number;
-  name: string;
-}
+export type Diet = BaseModel;
