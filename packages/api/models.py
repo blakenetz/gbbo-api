@@ -16,7 +16,8 @@ class Recipe(SQLModel, table=True, extend_existing=True):
   link: str = Field(nullable=False, unique=True)
   img: str = Field(nullable=False)
   difficulty: Optional[int]
-  is_technical: bool = Field(nullable=False)
+  category_id: Optional[int] = Field(default=None, foreign_key="categories.id")
+  # category: Optional['Category'] = Relationship(back_populates='recipes')
   time: Optional[int]
   baker_id: Optional[int] = Field(default=None, foreign_key="bakers.id")
   baker: Optional['Baker'] = Relationship(back_populates='recipes')
@@ -43,7 +44,7 @@ class RecipeResponse(BaseModel):
   link: str
   img: str
   difficulty: Optional[int]
-  is_technical: bool
+  category: Optional[str]
   time: Optional[int]
   baker: Optional[Baker] = None
   diets: Optional[List[Diet]] = None

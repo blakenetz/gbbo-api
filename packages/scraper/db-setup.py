@@ -12,8 +12,10 @@ con = sqlite3.connect(database_file)
 logger.debug("Dropping tables...")
 
 con.execute('DROP TABLE IF EXISTS recipe_diets;')
+con.execute('DROP TABLE IF EXISTS recipe_categories;')
 con.execute('DROP TABLE IF EXISTS recipes;')
 con.execute('DROP TABLE IF EXISTS diets;')
+con.execute('DROP TABLE IF EXISTS categories;')
 con.execute('DROP TABLE IF EXISTS bakers;')
 
 logger.debug("Creating tables...")
@@ -36,6 +38,13 @@ con.execute('''
             );''')
 
 con.execute('''
+            CREATE TABLE categories
+            (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL UNIQUE
+            );''')
+
+con.execute('''
             CREATE TABLE recipes 
             (
             id INTEGER PRIMARY KEY, 
@@ -43,7 +52,6 @@ con.execute('''
             link TEXT NOT NULL UNIQUE, 
             img TEXT NOT NULL, 
             difficulty INTEGER,
-            is_technical INTEGER NOT NULL,
             time int, 
             baker_id INTEGER,
             FOREIGN KEY (baker_id) REFERENCES bakers(id)
@@ -58,6 +66,17 @@ con.execute('''
             FOREIGN KEY(recipe_id) REFERENCES recipes(id),
             FOREIGN KEY(diet_id) REFERENCES diets(id),
             UNIQUE(recipe_id, diet_id)
+            );''')
+
+con.execute(''' 
+            CREATE TABLE recipe_categories
+            (
+            id INTEGER PRIMARY KEY,
+            recipe_id INTEGER NOT NULL,
+            category_id INTEGER NOT NULL,
+            FOREIGN KEY(recipe_id) REFERENCES recipes(id),
+            FOREIGN KEY(category_id) REFERENCES categories(id),
+            UNIQUE(recipe_id, category_id)
             );''')
 
 logger.debug("Finished!")

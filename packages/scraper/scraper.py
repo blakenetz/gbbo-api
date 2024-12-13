@@ -139,7 +139,6 @@ class RecipeScraper(WebScraper):
           },
           'difficulty': difficulty,
           'diets': list(map(lambda x: x["title"], dietary)),
-          'is_technical': 1 if card.find(class_="recipes-loop__item__tag") is not None else 0,
           'time': time
         })
       except requests.RequestException as e:
@@ -165,8 +164,8 @@ class RecipeScraper(WebScraper):
           baker_id = row[0]
 
       self.sql.execute(''' 
-                       INSERT INTO recipes(link, img, title, difficulty, is_technical, time, baker_id) 
-                       VALUES(:link, :img, :title, :difficulty, :is_technical, :time, :baker_id)
+                       INSERT INTO recipes(link, img, title, difficulty, time, baker_id) 
+                       VALUES(:link, :img, :title, :difficulty, :time, :baker_id)
                        ''', 
                        {**result, **{ "baker_id": baker_id }}
                        )
@@ -230,3 +229,41 @@ class BakerScraper(WebScraper):
     for result in results:  
       self.sql.execute('INSERT OR IGNORE INTO bakers(name, img, season) VALUES(:name, :img, :season)', result)
       self.connection.commit()
+
+
+class CategoryScraper(RecipeScraper):
+  def __init__(self, category: str):
+    super().__init__()
+    self.logger.debug('Initializing CategoryScraper...')
+    self.category = category
+
+  def _generate_page_url(self, page_number: int) -> str:
+    return f"{self.base_url}/page/{page_number}?category={self.category}"
+  
+  def _save_to_db(self, results: List[dict]) -> None:
+    self.logger.debug('Saving to DB...')
+    self.sql.execute('INSERT OR IGNORE INTO categories(name) VALUES(?)', (self.category,) )
+    category_id = self.sql.execute('SELECT id FROM categories WHERE name = :name', { "name": self.category }).fetchone()[0]
+
+    for result in results:
+      recipe_id = self.sql.execute('SELECT id FROM recipes WHERE link = :link', result).fetchone()[0]
+
+      if recipe_id is None:
+        self.logger.debug(f"Unable to find recipe {result['link']}")
+        continue
+      else:
+        self.sql.execute('INSERT OR IGNORE INTO recipe_categories(recipe_id, category_id) VALUES(?, ?)', (recipe_id, category_id))
+      
+    self.connection.commit()
+
+# Iterate over remaining queries and add metadata fields
+def add_metadata() -> None:
+  page = requests.get('https://thegreatbritishbakeoff.co.uk/recipes/all')
+  soup = BeautifulSoup(page.content, "html.parser")
+  categories = soup.select('input[name="category"]')
+  for category in categories:
+    category_value = category.get('value')
+    categoryScraper = CategoryScraper(category_value)
+    categoryScraper.scrape()
+
+    
