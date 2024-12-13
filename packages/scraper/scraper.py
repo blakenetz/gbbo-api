@@ -26,7 +26,7 @@ def parse_time_to_minutes(time_str):
   return total_minutes
 
 class WebScraper:
-  def __init__(self):
+  def __init__(self, max_page: int = 100):
     # Configure logging
     self.logger = get_logger(__name__)
     self.logger.debug('Initializing...')
@@ -36,15 +36,11 @@ class WebScraper:
     self.connection = sqlite3.connect(db_file)
     self.sql = self.connection.cursor()
 
-    self.base_url = "https://thegreatbritishbakeoff.co.uk/"
-    self.card_selector = "recipes-loop__item"
-
+    self.base_url = "https://thegreatbritishbakeoff.co.uk/recipes/all/"
+    self.card_selector = "ADD-CARD-SELECTOR"
+    self.max_page = max_page
     # uncomment to enable sql trace
     # self.connection.set_trace_callback(print)
-
-  # Use regex to remove the NNNxNNN substring before the file extension
-  def _normalize_image_url(self, url: str) -> str:
-    return re.sub(r'-\d+x\d+(-\d+)?', '', url)
   
   def _generate_page_url(self, page_number: int) -> str:  
     return self.base_url
@@ -84,6 +80,10 @@ class WebScraper:
       
       self.logger.info(f"Scraped page {page}: {count} items")
       self._save_to_db(results)
+
+      if page >= self.max_page:
+        break
+      
       page += 1
       # we want 4 rps
       time.sleep(.25)
@@ -97,9 +97,7 @@ class RecipeScraper(WebScraper):
   def __init__(self):
     super().__init__()
     self.logger.debug('Initializing RecipeScraper...')
-    self.base_url = "https://thegreatbritishbakeoff.co.uk/recipes/all/"
     self.card_selector = "recipes-loop__item"
-    
 
   def _generate_page_url(self, page_number: int) -> str:
     return f"{self.base_url}/page/{page_number}"
@@ -116,12 +114,11 @@ class RecipeScraper(WebScraper):
         figure = card.find("figure")
         img = list(filter(lambda x: x.name == 'img', figure.children))[0]
 
-        title = card.find(class_="recipes-loop__item__content").find('h5').string
-        
+        title = card.find(class_="recipes-loop__item__content").find('h5').string        
+        meta = card.find(class_="recipes-loop__item__meta")
+
         thumbnail = card.find(class_="thumbnail-baker")
         baker_info = None if thumbnail is None else thumbnail.find('img')
-
-        meta = card.find(class_="recipes-loop__item__meta")
         
         difficulty_level = meta.find('span', class_="difficulty-level")
         difficulty = None if difficulty_level is None else len(difficulty_level.select('span:not([class*="disabled"])'))
@@ -134,11 +131,11 @@ class RecipeScraper(WebScraper):
 
         results.append({
           'link': card.find('a')['href'],
-          'img': self._normalize_image_url(img['src']),
+          'img': img['src'],
           'title': title,
-          'baker': None if baker_info is None else { 
-            'name': baker_info['alt'], 
-            'img': self._normalize_image_url(baker_info['src']) 
+          'baker': None if baker_info is None else {
+            'name': baker_info['alt'],
+            'img': baker_info['src']
           },
           'difficulty': difficulty,
           'diets': list(map(lambda x: x["title"], dietary)),
@@ -153,19 +150,20 @@ class RecipeScraper(WebScraper):
 
   def _save_to_db(self, results: List[dict]) -> None:
     self.logger.debug('Saving to DB...')
-    for result in results:  
+    for result in results:
       baker_id = None
       baker = result['baker']
       if (result['baker']):
         # Try to find existing baker first
         row = self.sql.execute("SELECT id FROM bakers WHERE name = :name AND img = :img", baker).fetchone()
-        
+
         if row is None:
           # Baker doesn't exist, create new record
           self.sql.execute('INSERT INTO bakers(name, img) VALUES(:name, :img)', baker)
           baker_id = self.sql.lastrowid
         else:
           baker_id = row[0]
+
       self.sql.execute(''' 
                        INSERT INTO recipes(link, img, title, difficulty, is_technical, time, baker_id) 
                        VALUES(:link, :img, :title, :difficulty, :is_technical, :time, :baker_id)
@@ -192,13 +190,10 @@ class RecipeScraper(WebScraper):
 class BakerScraper(WebScraper):
   def __init__(self):
     super().__init__()
-    self.logger.debug('Initializing RecipeScraper...')
-    self.base_url = "https://thegreatbritishbakeoff.co.uk/bakers"
-    self.card_selector = "featured-block"
+    self.logger.debug('Initializing BakerScraper...')
+    self.card_selector = "baker-avatars__group"
+    self.max_page = 1
 
-  def _generate_page_url(self, page_number: int) -> str:
-    return f"{self.base_url}/series-{page_number}"
-  
   def _extract_items(self, cards: ResultSet[PageElement], page: int) -> List[dict]:
     self.logger.debug('Extracting items...')
     
@@ -208,22 +203,28 @@ class BakerScraper(WebScraper):
     results = []
     for card in cards: 
       try:
-        img = card.find("img")
-        name = card.find('h3').string
+        season_text = card.find(class_="baker-avatars__group__title").string
+        parsed_season_text = ''.join(filter(str.isdigit, season_text))
+        season = int(parsed_season_text) if parsed_season_text else None
+        bakers = card.find_all(class_="baker-avatars__list__item")
+
+        for baker in bakers:
+          _baker = baker.find("img")
+          img = _baker['src']
+          name = _baker['alt']
         
-        results.append({
-          'img': self._normalize_image_url(img['src']),
-          'name': name,
-          'season': page
-        })
+          results.append({
+            'img': img,
+            'name': name,
+            'season': season
+          })
 
       except requests.RequestException as e:
         self.logger.error(f"Request error on page {page}: {e}")
         return []
     
     return results
-    
-
+  
   def _save_to_db(self, results: List[dict]) -> None:
     self.logger.debug('Saving to DB...')
     for result in results:  

@@ -3,7 +3,7 @@ import os
 
 def get_logger(name: str) -> logging.Logger:
   logging.basicConfig(
-      level=logging.INFO, 
+      level=logging.DEBUG, 
       format='🍰 %(asctime)s - %(levelname)s: %(message)s'
     )
   return logging.getLogger(name)
