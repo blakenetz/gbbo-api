@@ -16,12 +16,11 @@
       "persistent": true
     },
     "scrape": {
-      "cache": false,
-      "persistent": true
+      "dependsOn": ["setup"],
+      "cache": false
     },
     "setup": {
-      "cache": false,
-      "persistent": true
+      "cache": false      
     }
   }
 } 

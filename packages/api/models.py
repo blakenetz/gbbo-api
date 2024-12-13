@@ -34,6 +34,7 @@ class Baker(SQLModel, table=True, extend_existing=True):
   id: Optional[int] = Field(default=None, primary_key=True)
   name: str = Field(nullable=False)
   img: str = Field(nullable=False)
+  season: Optional[int]
   recipes: list['Recipe'] = Relationship(back_populates='baker')
 
 class RecipeResponse(BaseModel):

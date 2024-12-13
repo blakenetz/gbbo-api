@@ -24,6 +24,7 @@ con.execute('''
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
             img TEXT NOT NULL,
+            season INTEGER,
             UNIQUE(name, img)
             );''')
 

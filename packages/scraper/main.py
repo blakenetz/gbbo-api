@@ -1,10 +1,12 @@
-from scraper import WebScraper
+from scraper import BakerScraper, RecipeScraper
 
 def main() -> None:
-  scraper = WebScraper()
+  baker_scraper = BakerScraper()
+  recipe_scraper = RecipeScraper()
 
   try: 
-    scraper.scrape()
+    baker_scraper.scrape()
+    recipe_scraper.scrape()
 
   except Exception as e:
     print(f"Scraping failed: {e}")
