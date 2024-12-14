@@ -4,13 +4,14 @@ import {
   AppShellHeader,
   AppShellMain,
   AppShellNavbar,
-  Burger,
+  Flex,
   Group,
   SimpleGrid,
   Title,
 } from "@mantine/core";
 import { ChefHat } from "lucide-react";
 import styles from "./layout.module.css";
+import { Pagination } from "@/components";
 
 export default function SearchLayout({ children }: React.PropsWithChildren) {
   return (
@@ -20,17 +21,21 @@ export default function SearchLayout({ children }: React.PropsWithChildren) {
       padding="md"
     >
       <AppShellHeader>
-        <Group h="100%" px="md">
-          <Burger opened={false} hiddenFrom="sm" size="sm" />
-          <ChefHat />
-          <Title order={4} component="h1">
-            GBBO Recipes
-          </Title>
-        </Group>
+        <Flex h="100%" px="md">
+          <Group>
+            <ChefHat />
+            <Title order={4} component="h1">
+              GBBO Recipes
+            </Title>
+          </Group>
+          <Pagination />
+        </Flex>
       </AppShellHeader>
+
       <AppShellNavbar p="md" component="aside" className={styles.navbar}>
         <Filters />
       </AppShellNavbar>
+
       <AppShellMain>
         <SimpleGrid
           cols={{ xs: 2, sm: 2, md: 3, xl: 4 }}

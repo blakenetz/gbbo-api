@@ -1,7 +1,8 @@
-import { SimpleGrid, Text, TextInput, Title } from "@mantine/core";
+import { Card } from "@/components";
+import { Flex, SimpleGrid, Text, TextInput, Title } from "@mantine/core";
 import { redirect } from "next/navigation";
 import { fetchRandomRecipe } from "./actions";
-import { Card } from "@/components";
+import styles from "./page.module.css";
 
 const cols = 3;
 
@@ -17,7 +18,14 @@ export default async function Home() {
   }
 
   return (
-    <>
+    <Flex
+      className={styles.container}
+      direction="column"
+      gap="md"
+      align="center"
+      justify="center"
+      mt="15dvh"
+    >
       <Title>GBBO Search</Title>
       <Text>A new way to search for Great British Bake Off recipes</Text>
       <form action={handleSubmit}>
@@ -31,6 +39,6 @@ export default async function Home() {
           <Card key={recipe.id} recipe={recipe} />
         ))}
       </SimpleGrid>
-    </>
+    </Flex>
   );
 }

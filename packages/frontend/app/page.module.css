@@ -9,7 +9,6 @@
   );
   min-width: 100dvw;
   min-height: 100dvh;
-  padding-top: 15dvh;
 }
 .container {
   padding: var(--mantine-spacing-xs);
