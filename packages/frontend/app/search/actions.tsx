@@ -6,7 +6,7 @@ const recipesPerPage = 25;
 
 export async function fetchRecipeByQuery(
   params: RecipeSearchParams
-): Promise<Recipe[]> {
+): Promise<{ recipes: Recipe[]; total: number }> {
   const { baker_ids, diet_ids, bake_type_ids, category_ids, ...initialParams } =
     params;
   const queryParams = new URLSearchParams(initialParams);
@@ -21,7 +21,12 @@ export async function fetchRecipeByQuery(
     }
   );
 
-  const response = await fetch(`${API_URL}/recipe?${queryParams.toString()}`);
+  const responses = await Promise.all([
+    fetch(`${API_URL}/recipe?${queryParams.toString()}`),
+    fetch(`${API_URL}/recipe/count?${queryParams.toString()}`),
+  ]);
 
-  return response.json();
+  const [recipes, total] = await Promise.all(responses.map((r) => r.json()));
+
+  return { recipes, total };
 }

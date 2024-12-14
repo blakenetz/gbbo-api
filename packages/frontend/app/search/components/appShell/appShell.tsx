@@ -1,21 +1,28 @@
-import { Filters } from "@/components";
 import {
-  AppShell,
   AppShellHeader,
   AppShellMain,
   AppShellNavbar,
   Flex,
   Group,
+  AppShell as MantineAppShell,
   SimpleGrid,
   Title,
 } from "@mantine/core";
 import { ChefHat } from "lucide-react";
-import styles from "./layout.module.css";
-import { Pagination } from "@/components";
+import styles from "./appShell.module.css";
 
-export default function SearchLayout({ children }: React.PropsWithChildren) {
+interface AppShellProps {
+  filters: React.ReactNode;
+  pagination: React.ReactNode;
+}
+
+export default function AppShell({
+  children,
+  filters,
+  pagination,
+}: React.PropsWithChildren<AppShellProps>) {
   return (
-    <AppShell
+    <MantineAppShell
       header={{ height: 60 }}
       navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: false } }}
       padding="md"
@@ -28,12 +35,15 @@ export default function SearchLayout({ children }: React.PropsWithChildren) {
               GBBO Recipes
             </Title>
           </Group>
-          <Pagination />
+          {pagination}
         </Flex>
       </AppShellHeader>
 
       <AppShellNavbar p="md" component="aside" className={styles.navbar}>
-        <Filters />
+        <Title order={4} component="p">
+          Filter by
+        </Title>
+        {filters}
       </AppShellNavbar>
 
       <AppShellMain>
@@ -45,6 +55,6 @@ export default function SearchLayout({ children }: React.PropsWithChildren) {
           {children}
         </SimpleGrid>
       </AppShellMain>
-    </AppShell>
+    </MantineAppShell>
   );
 }
