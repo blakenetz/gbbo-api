@@ -32,7 +32,7 @@ export default function SearchLayout({ children }: React.PropsWithChildren) {
       </AppShellNavbar>
       <AppShellMain>
         <SimpleGrid
-          cols={{ xs: 2, sm: 3, lg: 4 }}
+          cols={{ xs: 2, sm: 2, md: 3, xl: 4 }}
           spacing="xs"
           p={{ base: 0, xs: "xs" }}
         >

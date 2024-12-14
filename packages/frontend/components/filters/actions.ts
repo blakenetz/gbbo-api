@@ -1,21 +1,26 @@
 "use server";
-import { Diet, Baker } from "@/types";
+import { Diet, Baker, BakeType, Category } from "@/types";
 import { API_URL } from "@/util";
 import { redirect } from "next/navigation";
 
 export async function fetchFilters(): Promise<{
   bakers: Baker[];
   diets: Diet[];
+  bakeTypes: BakeType[];
+  categories: Category[];
 }> {
   const responses = await Promise.all([
     fetch(`${API_URL}/baker`),
     fetch(`${API_URL}/diet`),
+    fetch(`${API_URL}/bake_type`),
+    fetch(`${API_URL}/category`),
   ]);
-  const [bakers, diets] = await Promise.all(
+
+  const [bakers, diets, bakeTypes, categories] = await Promise.all(
     responses.map((response) => response.json())
   );
 
-  return { bakers, diets };
+  return { bakers, diets, bakeTypes, categories };
 }
 
 export async function submitFilters(formData: FormData) {

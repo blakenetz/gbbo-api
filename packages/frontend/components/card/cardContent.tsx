@@ -4,6 +4,7 @@ import {
   Button,
   Flex,
   MantineColor,
+  MantineGradient,
   Text,
   ThemeIcon,
 } from "@mantine/core";
@@ -22,6 +23,13 @@ const difficulties: { icon: LucideIcon; label: string; color: MantineColor }[] =
     { icon: Cake, label: "Medium", color: "yellow.9" },
     { icon: Croissant, label: "Hard", color: "red.9" },
   ];
+
+const categoryColors: Record<number, MantineGradient> = {
+  1: { from: "orange.4", to: "pink.4" },
+  2: { from: "yellow.4", to: "orange.4" },
+  3: { from: "indigo.4", to: "grape.4" },
+  4: { from: "green.5", to: "teal.4" },
+};
 
 function formatTime(minutes: number | null) {
   if (minutes === null) return null;
@@ -54,9 +62,9 @@ function Difficulty({ recipe }: CardContentProps) {
 }
 
 function Diets({ recipe }: CardContentProps) {
-  return recipe.diet.length > 0 ? (
+  return recipe.diets.length > 0 ? (
     <Flex gap="xs" px="xs" className={styles.diet}>
-      {recipe.diet.map((diet) => (
+      {recipe.diets.map((diet) => (
         <Diet diet={diet} key={diet.id} />
       ))}
     </Flex>
@@ -65,10 +73,10 @@ function Diets({ recipe }: CardContentProps) {
 
 export default function CardContent({ recipe }: CardContentProps) {
   const time = formatTime(recipe.time);
-  const isTechnical = recipe.bakeTypes.some(({ name }) => name === "Technical");
+  const category = recipe.categories.find(({ id }) => id <= 4);
 
   // display in single line
-  if (!isTechnical && !time) {
+  if (!category && !time) {
     return (
       <Flex gap="xs" align="center" justify="space-between" px="xs">
         <Difficulty recipe={recipe} />
@@ -82,16 +90,17 @@ export default function CardContent({ recipe }: CardContentProps) {
       <Flex gap="xs" align="center" justify="space-between" px="xs">
         <Difficulty recipe={recipe} />
 
-        {isTechnical && (
+        {category && (
           <Button
             variant="gradient"
-            gradient={{ from: "indigo", to: "grape", deg: 330 }}
+            gradient={{ ...categoryColors[category.id], deg: 330 }}
             size="compact-sm"
             radius="xs"
             component={Link}
-            href={`/search?category_ids=3`}
+            href={`/search?category_ids=${category.id}`}
+            autoContrast
           >
-            Technical
+            {category.name}
           </Button>
         )}
       </Flex>

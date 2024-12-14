@@ -1,12 +1,11 @@
 "use client";
 
-import { Multiselect } from "@/components";
-import { Baker, Diet } from "@/types";
+import { Multiselect, CheckboxGroup } from "@/components";
+import { Baker, BakeType, Category, Diet } from "@/types";
 import {
   ActionIcon,
   Avatar,
   Button,
-  Checkbox,
   Flex,
   Group,
   Select,
@@ -19,13 +18,19 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { submitFilters } from "./actions";
 
+interface FilterFormProps {
+  bakers: Baker[];
+  diets: Diet[];
+  bakeTypes: BakeType[];
+  categories: Category[];
+}
+
 export default function FilterForm({
   bakers,
   diets,
-}: {
-  bakers: Baker[];
-  diets: Diet[];
-}) {
+  bakeTypes,
+  categories,
+}: FilterFormProps) {
   const searchParams = useSearchParams();
   const [time, setTime] = useState(Number(searchParams.get("time")) || 0);
 
@@ -88,21 +93,26 @@ export default function FilterForm({
         </Tooltip>
       </Group>
 
-      <Checkbox.Group
+      <CheckboxGroup
+        options={diets}
+        name="diets"
+        searchParamName="diet_ids"
         label="Diets"
-        defaultValue={searchParams.get("diet_ids")?.split(",") ?? []}
-      >
-        <Group mt="xs">
-          {diets.map((diet) => (
-            <Checkbox
-              key={diet.id}
-              value={diet.id.toString()}
-              label={diet.name}
-              name="diets"
-            />
-          ))}
-        </Group>
-      </Checkbox.Group>
+      />
+
+      <CheckboxGroup
+        options={bakeTypes}
+        name="bake_types"
+        searchParamName="bake_type_ids"
+        label="Bake Types"
+      />
+
+      <CheckboxGroup
+        options={categories}
+        name="categories"
+        searchParamName="category_ids"
+        label="Categories"
+      />
 
       <Multiselect
         data={bakersWithIcons}

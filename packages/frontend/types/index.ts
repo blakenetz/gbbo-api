@@ -6,8 +6,8 @@ export interface Recipe {
   difficulty: number | null;
   time: number | null;
   baker: Baker | null;
-  diet: Diet[];
-  bakeTypes: BakeType[];
+  diets: Diet[];
+  bake_types: BakeType[];
   categories: Category[];
 }
 
