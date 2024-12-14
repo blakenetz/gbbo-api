@@ -1,13 +1,13 @@
 "use client";
 
-import { Multiselect, CheckboxGroup } from "@/components";
+import { CheckboxGroup, Multiselect } from "@/components";
 import { Baker, BakeType, Category, Diet } from "@/types";
 import {
   ActionIcon,
   Avatar,
   Button,
-  Flex,
   Group,
+  InputWrapper,
   Select,
   Slider,
   TextInput,
@@ -17,6 +17,10 @@ import { RotateCcw } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { submitFilters } from "./actions";
+import { debounce } from "lodash";
+import styles from "./filters.module.css";
+
+import Form from "next/form";
 
 interface FilterFormProps {
   bakers: Baker[];
@@ -24,6 +28,8 @@ interface FilterFormProps {
   bakeTypes: BakeType[];
   categories: Category[];
 }
+
+const debouncedSubmit = debounce(submitFilters, 1000);
 
 export default function FilterForm({
   bakers,
@@ -34,23 +40,39 @@ export default function FilterForm({
   const searchParams = useSearchParams();
   const [time, setTime] = useState(Number(searchParams.get("time")) || 0);
 
+  const handleChange = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (e.target instanceof HTMLInputElement && e.target.type === "text") {
+      // return early for search fields
+      if (e.target.name.includes("search")) return;
+      debouncedSubmit(formData);
+    } else {
+      submitFilters(formData);
+    }
+  };
+
   const bakersWithIcons = bakers.map((baker) => ({
     ...baker,
     icon: <Avatar src={baker.img} alt={baker.name} size="sm" />,
   }));
 
   return (
-    <Flex
-      direction="column"
-      gap="xl"
-      mt="md"
-      component="form"
+    <Form
       action={submitFilters}
+      onChange={handleChange}
+      className={styles.form}
     >
       <TextInput
         name="q"
         label="Recipe name"
         defaultValue={searchParams.get("q") ?? ""}
+      />
+
+      <Multiselect
+        data={bakersWithIcons}
+        name="bakers"
+        defaultValues={searchParams.get("baker_ids")?.split(",") ?? []}
       />
 
       <Select
@@ -66,32 +88,34 @@ export default function FilterForm({
         clearable
       />
 
-      <Group>
-        <Slider
-          flex={1}
-          name="time"
-          label={null}
-          max={240}
-          value={time}
-          onChange={setTime}
-          marks={[
-            { value: 60, label: "1h" },
-            { value: 120, label: "2h" },
-            { value: 180, label: "3h" },
-            { value: 240, label: "4h" },
-          ]}
-        />
-        <Tooltip label="Reset">
-          <ActionIcon
-            onClick={() => setTime(0)}
-            variant="subtle"
-            radius="xl"
-            size="xs"
-          >
-            <RotateCcw />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
+      <InputWrapper label="Cooking time">
+        <Group>
+          <Slider
+            flex={1}
+            name="time"
+            label={null}
+            max={240}
+            value={time}
+            onChange={setTime}
+            marks={[
+              { value: 60, label: "1h" },
+              { value: 120, label: "2h" },
+              { value: 180, label: "3h" },
+              { value: 240, label: "4h" },
+            ]}
+          />
+          <Tooltip label="Reset">
+            <ActionIcon
+              onClick={() => setTime(0)}
+              variant="subtle"
+              radius="xl"
+              size="xs"
+            >
+              <RotateCcw />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+      </InputWrapper>
 
       <CheckboxGroup
         options={diets}
@@ -114,13 +138,7 @@ export default function FilterForm({
         label="Categories"
       />
 
-      <Multiselect
-        data={bakersWithIcons}
-        name="bakers"
-        defaultValues={searchParams.get("baker_ids")?.split(",") ?? []}
-      />
-
       <Button type="submit">Filter</Button>
-    </Flex>
+    </Form>
   );
 }

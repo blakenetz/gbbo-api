@@ -3,8 +3,8 @@
 import { BaseModel } from "@/types";
 import {
   Checkbox,
-  Group,
   CheckboxGroupProps as MantineCheckboxGroupProps,
+  SimpleGrid,
 } from "@mantine/core";
 import { useSearchParams } from "next/navigation";
 
@@ -28,7 +28,7 @@ export default function CheckboxGroup({
       {...props}
       defaultValue={searchParams.get(searchParamName)?.split(",") ?? []}
     >
-      <Group mt="xs">
+      <SimpleGrid cols={2} mt="xs">
         {options.map(({ id, name }) => (
           <Checkbox
             key={id}
@@ -37,7 +37,7 @@ export default function CheckboxGroup({
             name={nameProp}
           />
         ))}
-      </Group>
+      </SimpleGrid>
     </Checkbox.Group>
   );
 }

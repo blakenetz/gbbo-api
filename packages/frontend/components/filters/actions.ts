@@ -29,6 +29,8 @@ export async function submitFilters(formData: FormData) {
   const time = formData.get("time") as string;
   const bakers = formData.get("bakers") as string;
   const diets = formData.getAll("diets") as string[];
+  const bakeTypes = formData.getAll("bake_types") as string[];
+  const categories = formData.getAll("categories") as string[];
 
   const searchParams = new URLSearchParams();
 
@@ -37,6 +39,10 @@ export async function submitFilters(formData: FormData) {
   if (time && time !== "0") searchParams.append("time", time);
   if (bakers) searchParams.append("baker_ids", bakers);
   if (diets.length > 0) searchParams.append("diet_ids", diets.join(","));
+  if (bakeTypes.length > 0)
+    searchParams.append("bake_type_ids", bakeTypes.join(","));
+  if (categories.length > 0)
+    searchParams.append("category_ids", categories.join(","));
 
   if (searchParams.size > 0) {
     redirect(`/search?${searchParams.toString()}`);

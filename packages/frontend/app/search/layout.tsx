@@ -10,6 +10,7 @@ import {
   Title,
 } from "@mantine/core";
 import { ChefHat } from "lucide-react";
+import styles from "./layout.module.css";
 
 export default function SearchLayout({ children }: React.PropsWithChildren) {
   return (
@@ -27,7 +28,7 @@ export default function SearchLayout({ children }: React.PropsWithChildren) {
           </Title>
         </Group>
       </AppShellHeader>
-      <AppShellNavbar p="md" component="aside">
+      <AppShellNavbar p="md" component="aside" className={styles.navbar}>
         <Filters />
       </AppShellNavbar>
       <AppShellMain>
