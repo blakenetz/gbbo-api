@@ -231,19 +231,22 @@ class BakerScraper(WebScraper):
       self.connection.commit()
 
 
-class CategoryScraper(RecipeScraper):
-  def __init__(self, category: str):
+class DataScraper(RecipeScraper):
+  def __init__(self, model: str, value: str, param: str | None = None, fk: str | None = None):
     super().__init__()
-    self.logger.debug('Initializing CategoryScraper...')
-    self.category = category
+    self.logger.debug('Initializing DataScraper...')
+    self.model = model
+    self.value = value
+    self.param = param if param else model
+    self.fk = fk if fk else model.rstrip('s') + '_id'
 
   def _generate_page_url(self, page_number: int) -> str:
-    return f"{self.base_url}/page/{page_number}?category={self.category}"
+    return f"{self.base_url}/page/{page_number}?{self.param}={self.value}"
   
   def _save_to_db(self, results: List[dict]) -> None:
     self.logger.debug('Saving to DB...')
-    self.sql.execute('INSERT OR IGNORE INTO categories(name) VALUES(?)', (self.category,) )
-    category_id = self.sql.execute('SELECT id FROM categories WHERE name = :name', { "name": self.category }).fetchone()[0]
+    self.sql.execute(f'INSERT OR IGNORE INTO {self.model}(name) VALUES(?)', (self.value,) )
+    model_id = self.sql.execute(f'SELECT id FROM {self.model} WHERE name = :name', { "name": self.value }).fetchone()[0]
 
     for result in results:
       recipe_id = self.sql.execute('SELECT id FROM recipes WHERE link = :link', result).fetchone()[0]
@@ -252,7 +255,7 @@ class CategoryScraper(RecipeScraper):
         self.logger.debug(f"Unable to find recipe {result['link']}")
         continue
       else:
-        self.sql.execute('INSERT OR IGNORE INTO recipe_categories(recipe_id, category_id) VALUES(?, ?)', (recipe_id, category_id))
+        self.sql.execute(f'INSERT OR IGNORE INTO recipe_{self.model}(recipe_id, {self.fk}) VALUES(?, ?)', (recipe_id, model_id))
       
     self.connection.commit()
 
@@ -260,10 +263,21 @@ class CategoryScraper(RecipeScraper):
 def add_metadata() -> None:
   page = requests.get('https://thegreatbritishbakeoff.co.uk/recipes/all')
   soup = BeautifulSoup(page.content, "html.parser")
+  
   categories = soup.select('input[name="category"]')
   for category in categories:
     category_value = category.get('value')
-    categoryScraper = CategoryScraper(category_value)
+    if (category_value == 'All'):
+      continue
+    categoryScraper = DataScraper('categories', category_value, 'category', 'category_id')
     categoryScraper.scrape()
+
+  types = soup.select('input[name="type"]')
+  for type in types:
+    type_value = type.get('value')
+    if (type_value == 'All'):
+      continue
+    typeScraper = DataScraper('bake_types', type_value, 'type')
+    typeScraper.scrape()
 
     

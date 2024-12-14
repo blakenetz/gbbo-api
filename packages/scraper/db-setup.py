@@ -13,9 +13,11 @@ logger.debug("Dropping tables...")
 
 con.execute('DROP TABLE IF EXISTS recipe_diets;')
 con.execute('DROP TABLE IF EXISTS recipe_categories;')
+con.execute('DROP TABLE IF EXISTS recipe_bake_types;')
 con.execute('DROP TABLE IF EXISTS recipes;')
 con.execute('DROP TABLE IF EXISTS diets;')
 con.execute('DROP TABLE IF EXISTS categories;')
+con.execute('DROP TABLE IF EXISTS bake_types;')
 con.execute('DROP TABLE IF EXISTS bakers;')
 
 logger.debug("Creating tables...")
@@ -39,6 +41,13 @@ con.execute('''
 
 con.execute('''
             CREATE TABLE categories
+            (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL UNIQUE
+            );''')
+
+con.execute('''
+            CREATE TABLE bake_types
             (
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL UNIQUE
@@ -77,6 +86,17 @@ con.execute('''
             FOREIGN KEY(recipe_id) REFERENCES recipes(id),
             FOREIGN KEY(category_id) REFERENCES categories(id),
             UNIQUE(recipe_id, category_id)
+            );''')
+
+con.execute('''
+            CREATE TABLE recipe_bake_types
+            (
+            id INTEGER PRIMARY KEY,
+            recipe_id INTEGER NOT NULL,
+            bake_type_id INTEGER NOT NULL,
+            FOREIGN KEY(recipe_id) REFERENCES recipes(id),
+            FOREIGN KEY(bake_type_id) REFERENCES bake_types(id),
+            UNIQUE(recipe_id, bake_type_id)
             );''')
 
 logger.debug("Finished!")
