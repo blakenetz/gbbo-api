@@ -40,7 +40,6 @@ class RecipeService:
     skip: int = 0,
     q: Optional[str] = None,
     difficulty: Optional[int] = None,
-    is_technical: Optional[bool] = None,
     time: Optional[int] = None,
     baker_ids: Optional[List[int]] = None,
     diet_ids: Optional[List[int]] = None,
@@ -55,7 +54,6 @@ class RecipeService:
     filters = [
       (q, lambda s: s.where(Recipe.title.contains(q))),
       (difficulty, lambda s: s.where(Recipe.difficulty == difficulty)),
-      (is_technical is not None, lambda s: s.where(Recipe.is_technical == is_technical)),
       (time, lambda s: s.where(Recipe.time <= time)),
       (baker_ids, lambda s: s.where(Recipe.baker_id.in_(baker_ids))),
       (diet_ids, lambda s: s.where(RecipeDiet.diet_id.in_(diet_ids))),

@@ -11,7 +11,6 @@ import {
   Group,
   Select,
   Slider,
-  Switch,
   TextInput,
   Tooltip,
 } from "@mantine/core";
@@ -47,12 +46,6 @@ export default function FilterForm({
         name="q"
         label="Recipe name"
         defaultValue={searchParams.get("q") ?? ""}
-      />
-
-      <Switch
-        name="is_technical"
-        label="Technical"
-        defaultChecked={searchParams.get("is_technical") === "on"}
       />
 
       <Select

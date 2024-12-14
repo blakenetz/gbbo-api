@@ -20,7 +20,6 @@ export async function fetchFilters(): Promise<{
 
 export async function submitFilters(formData: FormData) {
   const q = formData.get("q") as string;
-  const is_technical = formData.get("is_technical") as string;
   const difficulty = formData.get("difficulty") as string;
   const time = formData.get("time") as string;
   const bakers = formData.get("bakers") as string;
@@ -29,7 +28,6 @@ export async function submitFilters(formData: FormData) {
   const searchParams = new URLSearchParams();
 
   if (q) searchParams.append("q", q);
-  if (is_technical) searchParams.append("is_technical", is_technical);
   if (difficulty) searchParams.append("difficulty", difficulty);
   if (time && time !== "0") searchParams.append("time", time);
   if (bakers) searchParams.append("baker_ids", bakers);

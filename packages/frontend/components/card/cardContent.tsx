@@ -65,9 +65,10 @@ function Diets({ recipe }: CardContentProps) {
 
 export default function CardContent({ recipe }: CardContentProps) {
   const time = formatTime(recipe.time);
+  const isTechnical = recipe.bakeTypes.some(({ name }) => name === "Technical");
 
   // display in single line
-  if (!recipe.is_technical && !time) {
+  if (!isTechnical && !time) {
     return (
       <Flex gap="xs" align="center" justify="space-between" px="xs">
         <Difficulty recipe={recipe} />
@@ -81,14 +82,14 @@ export default function CardContent({ recipe }: CardContentProps) {
       <Flex gap="xs" align="center" justify="space-between" px="xs">
         <Difficulty recipe={recipe} />
 
-        {recipe.is_technical && (
+        {isTechnical && (
           <Button
             variant="gradient"
             gradient={{ from: "indigo", to: "grape", deg: 330 }}
             size="compact-sm"
             radius="xs"
             component={Link}
-            href={`/search?is_technical=true`}
+            href={`/search?category_ids=3`}
           >
             Technical
           </Button>

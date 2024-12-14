@@ -17,7 +17,6 @@ def get_recipes(
   skip: Optional[int] = 0,
   q: Annotated[Optional[str], Query(description="Case insensitive search against recipe title")] = None,
   difficulty: Annotated[Optional[int], Query(le=3, ge=1, description="Difficulty on a 1-3 scale")] = None,
-  is_technical: Annotated[Optional[bool], Query(description="Filter by technical bakes only")] = None,
   time: Annotated[Optional[int], Query(description="Max time in minutes")] = None,
   baker_ids: Annotated[list[int], Query(description="List of baker ids. Available at GET /bakers")] = None,
   diet_ids: Annotated[list[int], Query(description="List of diet ids. Available at GET /diets")] = None,
@@ -26,7 +25,7 @@ def get_recipes(
 ):
   return RecipeService.get_recipes(
     session, limit, skip, q, difficulty, 
-    is_technical, time, baker_ids, diet_ids,
+     time, baker_ids, diet_ids,
     category_ids, bake_type_ids
   )
 
