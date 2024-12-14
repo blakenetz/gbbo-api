@@ -232,13 +232,13 @@ class BakerScraper(WebScraper):
 
 
 class DataScraper(RecipeScraper):
-  def __init__(self, model: str, value: str, param: str | None = None, fk: str | None = None):
+  def __init__(self, model: str, value: str, param: str | None = None):
     super().__init__()
     self.logger.debug('Initializing DataScraper...')
     self.model = model
     self.value = value
     self.param = param if param else model
-    self.fk = fk if fk else model.rstrip('s') + '_id'
+    self.fk = param + '_id' if param else model.rstrip('s') + '_id'
 
   def _generate_page_url(self, page_number: int) -> str:
     return f"{self.base_url}/page/{page_number}?{self.param}={self.value}"
@@ -269,7 +269,7 @@ def add_metadata() -> None:
     category_value = category.get('value')
     if (category_value == 'All'):
       continue
-    categoryScraper = DataScraper('categories', category_value, 'category', 'category_id')
+    categoryScraper = DataScraper('categories', category_value, 'category')
     categoryScraper.scrape()
 
   types = soup.select('input[name="type"]')

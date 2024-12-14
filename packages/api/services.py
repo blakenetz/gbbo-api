@@ -4,7 +4,7 @@ from sqlmodel import Session,  select
 from sqlmodel.sql.expression import SelectOfScalar
 from sqlalchemy.orm import selectinload
 from sqlalchemy import func
-from models import Baker, Diet, Recipe, RecipeDiet, RecipeResponse
+from models import BakeType, Baker, Category, Diet, Recipe, RecipeBakeType, RecipeCategory, RecipeDiet, RecipeResponse
 from util import get_logger
 
 logger = get_logger(__name__)
@@ -14,7 +14,9 @@ class RecipeService:
   def parse_recipe(db_result: Recipe) -> RecipeResponse:
     data = db_result.model_dump(exclude={'baker_id'})
     data['baker'] = db_result.baker.model_dump(exclude={"recipes"}) if db_result.baker else None
-    data['diet'] = db_result.diets
+    data['diets'] = db_result.diets
+    data['categories'] = db_result.categories
+    data['bake_types'] = db_result.bake_types
     
     return data
   
@@ -24,7 +26,9 @@ class RecipeService:
       select(Recipe)
       .options(
         selectinload(Recipe.baker),
-        selectinload(Recipe.diets)
+        selectinload(Recipe.diets),
+        selectinload(Recipe.categories),
+        selectinload(Recipe.bake_types)
       )
     )
   
@@ -39,7 +43,9 @@ class RecipeService:
     is_technical: Optional[bool] = None,
     time: Optional[int] = None,
     baker_ids: Optional[List[int]] = None,
-    diet_ids: Optional[List[int]] = None
+    diet_ids: Optional[List[int]] = None,
+    category_ids: Optional[List[int]] = None,
+    bake_type_ids: Optional[List[int]] = None
   ) -> List[dict]:
     """Fetch recipes with multiple filtering options."""
     statement = self.get_root_statement()
@@ -52,13 +58,16 @@ class RecipeService:
       (is_technical is not None, lambda s: s.where(Recipe.is_technical == is_technical)),
       (time, lambda s: s.where(Recipe.time <= time)),
       (baker_ids, lambda s: s.where(Recipe.baker_id.in_(baker_ids))),
+      (diet_ids, lambda s: s.where(RecipeDiet.diet_id.in_(diet_ids))),
+      (category_ids, lambda s: s.where(RecipeCategory.category_id.in_(category_ids))),
+      (bake_type_ids, lambda s: s.where(RecipeBakeType.bake_type_id.in_(bake_type_ids))),
     ]
     
     for condition, filter in filters:
       if condition:
         statement = filter(statement)
     
-    # Special handling for diet_ids
+    # Special handling for join tables
     if diet_ids:
       statement = (
         statement
@@ -66,6 +75,20 @@ class RecipeService:
         .where(RecipeDiet.diet_id.in_(diet_ids))
         .distinct()
       )
+    if category_ids:
+      statement = (
+        statement
+        .join(RecipeCategory, RecipeCategory.recipe_id == Recipe.id)
+        .where(RecipeCategory.category_id.in_(category_ids))
+        .distinct()
+      )
+    if bake_type_ids:
+      statement = (
+        statement
+        .join(RecipeBakeType, RecipeBakeType.recipe_id == Recipe.id)
+        .where(RecipeBakeType.bake_type_id.in_(bake_type_ids))
+        .distinct()
+      ) 
 
     results = session.exec(statement).all()
     
@@ -97,7 +120,7 @@ class RecipeService:
 
 class GenericService:
   @classmethod
-  def get_items(self, model: Union[Baker, Diet], session: Session, q: Optional[str] = None):
+  def get_items(self, model: Union[Baker, Diet, Category, BakeType], session: Session, q: Optional[str] = None):
     statement = select(model)
     if q:
       statement = statement.where(model.name.contains(q))
@@ -110,7 +133,7 @@ class GenericService:
     return list(results)
   
   @classmethod
-  def get_item(self, model: Union[Baker, Diet], session: Session, id: int):
+  def get_item(self, model: Union[Baker, Diet, Category, BakeType], session: Session, id: int):
     result = session.get(model, id)
 
     if not result:
@@ -119,6 +142,6 @@ class GenericService:
     return result
   
   @classmethod
-  def get_item_count(self, model: Union[Baker, Diet], session: Session):
+  def get_item_count(self, model: Union[Baker, Diet, Category, BakeType], session: Session):
     statement = select(func.count(model.id))
     return session.exec(statement).first()

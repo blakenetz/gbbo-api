@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from db import create_db_and_tables
-from routes import recipe_router, diet_router, baker_router
+from routes import recipe_router, diet_router, baker_router, category_router, bake_type_router
 from util import get_logger 
 
 logger = get_logger(__name__)
@@ -27,6 +27,8 @@ app.add_middleware(
 app.include_router(recipe_router, prefix='/recipe', tags=['recipe'])
 app.include_router(baker_router, prefix="/baker", tags=['baker'])
 app.include_router(diet_router, prefix="/diet", tags=['diet'])
+app.include_router(category_router, prefix="/category", tags=['category'])
+app.include_router(bake_type_router, prefix="/bake_type", tags=['bake_type'])
 
 @app.on_event("startup")
 def on_startup():
