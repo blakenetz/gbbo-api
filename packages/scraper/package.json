@@ -1,0 +1,17 @@
+{
+  "name": "@gbbo/scraper",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "poetry": "poetry",
+    "scrape": "poetry run python main.py",
+    "setup": "poetry run python db-setup.py"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@gbbo/frontend": "^0.1.0",
+    "@types/lodash": "^4.17.13"
+  }
+}

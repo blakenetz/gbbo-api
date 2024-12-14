@@ -3,7 +3,11 @@ from fastapi import HTTPException
 from sqlmodel import Session,  select
 from sqlmodel.sql.expression import SelectOfScalar
 from sqlalchemy.orm import selectinload
+from sqlalchemy import func
 from models import Baker, Diet, Recipe, RecipeDiet, RecipeResponse
+from util import get_logger
+
+logger = get_logger(__name__)
 
 class RecipeService:
   @staticmethod 
@@ -85,6 +89,11 @@ class RecipeService:
       raise HTTPException(status_code=404, detail="No recipe found")
     
     return self.parse_recipe(result)
+  
+  @classmethod
+  def get_recipe_count(self, session: Session):
+    statement = select(func.count(Recipe.id))
+    return session.exec(statement).first()
 
 class GenericService:
   @classmethod
@@ -108,3 +117,8 @@ class GenericService:
       raise HTTPException(status_code=404, detail=f"No {model.__name__} found")
     
     return result
+  
+  @classmethod
+  def get_item_count(self, model: Union[Baker, Diet], session: Session):
+    statement = select(func.count(model.id))
+    return session.exec(statement).first()

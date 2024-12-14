@@ -8,7 +8,8 @@ recipe_router = APIRouter()
 baker_router = APIRouter()
 diet_router = APIRouter()
 
-@recipe_router.get("/recipes", tags=['recipes'])
+# recipe router
+@recipe_router.get("/")
 def get_recipes(
   session: SessionDep,
   limit: Optional[int] = 50,
@@ -25,28 +26,44 @@ def get_recipes(
     is_technical, time, baker_ids, diet_ids
   )
 
-@recipe_router.get("/recipe/{recipe_id}", tags=['recipes'])
-def get_recipe(session: SessionDep, recipe_id: int):
+@recipe_router.get("/count")
+def get_recipe_count(session: SessionDep):
+  return RecipeService.get_recipe_count(session)
+
+@recipe_router.get("/{recipe_id}")
+def get_recipe_by_id(session: SessionDep, recipe_id: int):
   return RecipeService.get_recipe(session, recipe_id)
 
-@baker_router.get("/bakers", tags=['bakers'])
+
+# baker router
+@baker_router.get("/")
 def get_bakers(
   session: SessionDep,
   q: Annotated[Optional[str], Query(description="Case insensitive search against baker's name")] = None
 ):
   return GenericService.get_items(Baker, session, q)
   
-@baker_router.get("/baker/{baker_id}", tags=['bakers'])
-def get_baker(baker_id: int, session: SessionDep):
+@baker_router.get("/count")
+def get_baker_count(session: SessionDep):
+  return GenericService.get_item_count(Baker, session)
+
+@baker_router.get("/{baker_id}")
+def get_baker_by_id(baker_id: int, session: SessionDep):
   return GenericService.get_item(Baker, session, baker_id)
 
-@diet_router.get("/diets", tags=['diets'])
+
+# diet router
+@diet_router.get("/")
 def get_diets(
   session: SessionDep,
   q: Annotated[Optional[str], Query(description="Case insensitive search against diet name")] = None
 ):
   return GenericService.get_items(Diet, session, q)
 
-@diet_router.get("/diet/{diet_id}", tags=['diets'])
-def get_diet(diet_id: int, session: SessionDep):
+@diet_router.get("/count")
+def get_diet_count(session: SessionDep):
+  return GenericService.get_item_count(Diet, session)
+
+@diet_router.get("/{diet_id}")
+def get_diet_by_id(diet_id: int, session: SessionDep):
   return GenericService.get_item(Diet, session, diet_id)

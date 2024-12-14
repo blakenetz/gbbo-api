@@ -1,0 +1,17 @@
+.root {
+  background: linear-gradient(
+    165deg,
+    var(--mantine-color-gray-2),
+    var(--mantine-color-yellow-2),
+    var(--mantine-color-yellow-1),
+    var(--mantine-color-blue-1),
+    var(--mantine-color-blue-3)
+  );
+  min-width: 100dvw;
+  min-height: 100dvh;
+  padding-top: 15dvh;
+}
+.container {
+  padding: var(--mantine-spacing-xs);
+  max-width: var(--mantine-breakpoint-xl);
+}
