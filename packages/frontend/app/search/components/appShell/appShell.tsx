@@ -28,7 +28,7 @@ export default function AppShell({
       padding="md"
     >
       <AppShellHeader>
-        <Flex h="100%" px="md">
+        <Flex h="100%" px="md" justify="space-between" align="center">
           <Group>
             <ChefHat />
             <Title order={4} component="h1">

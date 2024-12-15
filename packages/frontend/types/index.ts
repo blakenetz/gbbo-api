@@ -20,8 +20,8 @@ type RecipeSearchParamsKeys =
   | "baker_ids"
   | "diet_ids"
   | "category_ids"
-  | "bake_type_ids";
-
+  | "bake_type_ids"
+  | "page";
 export type RecipeSearchParams = Partial<
   Record<RecipeSearchParamsKeys, string>
 >;

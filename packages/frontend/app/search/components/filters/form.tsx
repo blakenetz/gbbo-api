@@ -1,6 +1,5 @@
 "use client";
 
-import { CheckboxGroup, Multiselect } from "@/components";
 import { Baker, BakeType, Category, Diet } from "@/types";
 import {
   ActionIcon,
@@ -19,6 +18,7 @@ import { useState } from "react";
 import { submitFilters } from "./actions";
 import { debounce } from "lodash";
 import styles from "./filters.module.css";
+import { CheckboxGroup, Multiselect } from "../index";
 
 import Form from "next/form";
 
