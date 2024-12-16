@@ -1,7 +1,8 @@
 import { Text } from "@mantine/core";
-import { fetchRecipeByQuery } from "./actions";
+import { fetchRecipeByQuery, fetchFilters } from "./actions";
 import { Card } from "@/components";
 import { RecipeSearchParams } from "@/types";
+import { AppShellClient } from "./components";
 
 interface SearchPageProps {
   searchParams: Promise<RecipeSearchParams>;
@@ -9,11 +10,16 @@ interface SearchPageProps {
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
-  const recipes = await fetchRecipeByQuery(params);
+  const { recipes, total } = await fetchRecipeByQuery(params);
+  const filterProps = await fetchFilters();
 
-  if (!recipes.length) {
-    return <Text>No recipes found</Text>;
-  }
-
-  return recipes.map((recipe) => <Card key={recipe.id} recipe={recipe} />);
+  return (
+    <AppShellClient paginationProps={{ total }} filterProps={filterProps}>
+      {recipes.length ? (
+        recipes.map((recipe) => <Card key={recipe.id} recipe={recipe} />)
+      ) : (
+        <Text>No recipes found</Text>
+      )}
+    </AppShellClient>
+  );
 }

@@ -4,10 +4,11 @@ export interface Recipe {
   link: string;
   img: string;
   difficulty: number | null;
-  is_technical: boolean;
   time: number | null;
   baker: Baker | null;
-  diet: Diet[];
+  diets: Diet[];
+  bake_types: BakeType[];
+  categories: Category[];
 }
 
 type RecipeSearchParamsKeys =
@@ -15,11 +16,12 @@ type RecipeSearchParamsKeys =
   | "skip"
   | "q"
   | "difficulty"
-  | "is_technical"
   | "time"
   | "baker_ids"
-  | "diet_ids";
-
+  | "diet_ids"
+  | "category_ids"
+  | "bake_type_ids"
+  | "page";
 export type RecipeSearchParams = Partial<
   Record<RecipeSearchParamsKeys, string>
 >;
@@ -34,3 +36,7 @@ export interface Baker extends BaseModel {
 }
 
 export type Diet = BaseModel;
+
+export type BakeType = BaseModel;
+
+export type Category = BaseModel;
