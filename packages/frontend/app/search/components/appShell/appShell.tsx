@@ -5,45 +5,68 @@ import {
   Flex,
   Group,
   AppShell as MantineAppShell,
+  AppShellProps as MantineAppShellProps,
   SimpleGrid,
   Title,
+  ActionIcon,
+  AppShellNavbarConfiguration,
 } from "@mantine/core";
 import { ChefHat } from "lucide-react";
+import Link from "next/link";
 import styles from "./appShell.module.css";
 
-interface AppShellProps {
-  filters: React.ReactNode;
-  pagination: React.ReactNode;
+export interface AppShellProps extends Omit<MantineAppShellProps, "navbar"> {
+  navbarChildren: {
+    title?: React.ReactNode;
+    body: React.ReactNode;
+  };
+  headerChildren: React.ReactNode;
+  navbarConfig?: Partial<AppShellNavbarConfiguration>;
 }
 
 export default function AppShell({
   children,
-  filters,
-  pagination,
+  navbarChildren,
+  headerChildren,
+  navbarConfig,
+  ...props
 }: React.PropsWithChildren<AppShellProps>) {
   return (
     <MantineAppShell
-      header={{ height: 60 }}
-      navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: false } }}
+      {...props}
+      layout="alt"
+      header={{ height: 60, ...props.header }}
+      navbar={{ width: 300, breakpoint: "sm", ...navbarConfig }}
       padding="md"
     >
       <AppShellHeader>
         <Flex h="100%" px="md" justify="space-between" align="center">
           <Group>
-            <ChefHat />
+            <ActionIcon
+              component={Link}
+              href="/"
+              variant="subtle"
+              radius="xl"
+              size="lg"
+            >
+              <ChefHat />
+            </ActionIcon>
             <Title order={4} component="h1">
               GBBO Recipes
             </Title>
           </Group>
-          {pagination}
+          {headerChildren}
         </Flex>
       </AppShellHeader>
 
       <AppShellNavbar p="md" component="aside" className={styles.navbar}>
-        <Title order={4} component="p">
-          Filter by
-        </Title>
-        {filters}
+        <Group justify="space-between" gap="xs">
+          <Title order={4} component="p">
+            Filter by
+          </Title>
+          {navbarChildren.title}
+        </Group>
+        {navbarChildren.body}
       </AppShellNavbar>
 
       <AppShellMain>

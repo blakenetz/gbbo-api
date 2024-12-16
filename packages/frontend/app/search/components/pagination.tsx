@@ -5,7 +5,7 @@ import { Pagination as MantinePagination } from "@mantine/core";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-interface PaginationProps {
+export interface PaginationProps {
   // total number of items
   total: number;
 }
@@ -50,6 +50,7 @@ export default function Pagination({ total }: PaginationProps) {
       total={totalPages}
       value={currentPage}
       withEdges
+      hideWithOnePage
       getItemProps={(page) => getItemProps(params, page)}
       getControlProps={(control) =>
         getControlProps(params, totalPages, control)

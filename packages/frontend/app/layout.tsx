@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { ColorSchemeScript, Flex, MantineProvider } from "@mantine/core";
+import {
+  ColorSchemeScript,
+  createTheme,
+  Flex,
+  MantineProvider,
+} from "@mantine/core";
 import "@mantine/core/styles.css";
 import styles from "./page.module.css";
 
@@ -7,6 +12,10 @@ export const metadata: Metadata = {
   title: "GBBO Search",
   description: "A new way to search for Great British Bake Off recipes",
 };
+
+const theme = createTheme({
+  primaryColor: "violet",
+});
 
 export default function RootLayout({
   children,
@@ -24,7 +33,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <MantineProvider>
+        <MantineProvider theme={theme}>
           <Flex
             className={styles.root}
             component="section"

@@ -1,7 +1,7 @@
 import { Flex, Skeleton } from "@mantine/core";
 import { AppShell } from "./components";
 
-function LoadingFilters() {
+function NavbarLoader() {
   return (
     <Flex gap="md" direction="column" mt="md">
       {Array.from({ length: 5 }).map((_, i) => (
@@ -11,7 +11,7 @@ function LoadingFilters() {
   );
 }
 
-function LoadingPagination() {
+function HeaderLoader() {
   return (
     <Flex gap="sm">
       {Array.from({ length: 5 }).map((_, i) => (
@@ -23,7 +23,10 @@ function LoadingPagination() {
 
 export default function SearchLoading() {
   return (
-    <AppShell filters={<LoadingFilters />} pagination={<LoadingPagination />}>
+    <AppShell
+      navbarChildren={{ body: <NavbarLoader /> }}
+      headerChildren={<HeaderLoader />}
+    >
       {Array.from({ length: 9 }).map((_, i) => (
         <Skeleton key={i} width="250px" height="320px" radius="md" animate />
       ))}
