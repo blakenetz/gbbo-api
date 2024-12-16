@@ -1,11 +1,15 @@
 "use client";
 
 import { paginationAmount } from "@/util";
-import { Pagination as MantinePagination } from "@mantine/core";
+import {
+  Pagination as MantinePagination,
+  PaginationProps as MantinePaginationProps,
+} from "@mantine/core";
+
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-export interface PaginationProps {
+export interface PaginationProps extends Partial<MantinePaginationProps> {
   // total number of items
   total: number;
 }
@@ -27,18 +31,33 @@ function getControlProps(
   const _params = new URLSearchParams(params.toString());
   const currentPage = Number(params.get("page")) || 1;
   let page = currentPage;
+  let hidden = false;
 
-  if (control === "first") page = 1;
-  else if (control === "last") page = totalPages;
-  else if (control === "next") page = currentPage + 1;
-  else if (control === "previous") page = currentPage - 1;
+  if (control === "first") {
+    page = 1;
+    hidden = currentPage === 1;
+  } else if (control === "last") {
+    page = totalPages;
+    hidden = currentPage === totalPages;
+  } else if (control === "next") {
+    page = currentPage + 1;
+    hidden = currentPage === totalPages;
+  } else if (control === "previous") {
+    page = currentPage - 1;
+    hidden = currentPage === 1;
+  }
 
   _params.set("page", page.toString());
 
-  return { component: Link, href: `/search?${_params.toString()}` };
+  return {
+    component: Link,
+    href: `/search?${_params.toString()}`,
+    disabled: page === currentPage,
+    ...(hidden && { style: { display: "none" } }),
+  };
 }
 
-export default function Pagination({ total }: PaginationProps) {
+export default function Pagination({ total, ...props }: PaginationProps) {
   const params = useSearchParams();
 
   const currentPage = Number(params.get("page")) || 1;
@@ -46,10 +65,10 @@ export default function Pagination({ total }: PaginationProps) {
 
   return (
     <MantinePagination
-      onClick={(e) => console.log("hi", e.currentTarget, e.target)}
+      {...props}
+      size="sm"
       total={totalPages}
       value={currentPage}
-      withEdges
       hideWithOnePage
       getItemProps={(page) => getItemProps(params, page)}
       getControlProps={(control) =>

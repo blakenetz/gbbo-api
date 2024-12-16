@@ -10,25 +10,29 @@ import {
   Title,
   ActionIcon,
   AppShellNavbarConfiguration,
+  AppShellFooterConfiguration,
+  AppShellFooter,
 } from "@mantine/core";
 import { ChefHat } from "lucide-react";
 import Link from "next/link";
 import styles from "./appShell.module.css";
 
 export interface AppShellProps extends Omit<MantineAppShellProps, "navbar"> {
-  navbarChildren: {
-    title?: React.ReactNode;
-    body: React.ReactNode;
+  slots?: {
+    navbarTitle?: React.ReactNode;
+    navbarBody?: React.ReactNode;
+    header?: React.ReactNode;
+    footer?: React.ReactNode;
   };
-  headerChildren: React.ReactNode;
   navbarConfig?: Partial<AppShellNavbarConfiguration>;
+  footerConfig?: Partial<AppShellFooterConfiguration>;
 }
 
 export default function AppShell({
   children,
-  navbarChildren,
-  headerChildren,
+  slots = {},
   navbarConfig,
+  footerConfig,
   ...props
 }: React.PropsWithChildren<AppShellProps>) {
   return (
@@ -36,7 +40,8 @@ export default function AppShell({
       {...props}
       layout="alt"
       header={{ height: 60, ...props.header }}
-      navbar={{ width: 300, breakpoint: "sm", ...navbarConfig }}
+      navbar={{ width: 300, breakpoint: "md", ...navbarConfig }}
+      footer={{ height: 60, ...footerConfig }}
       padding="md"
     >
       <AppShellHeader>
@@ -55,7 +60,7 @@ export default function AppShell({
               GBBO Recipes
             </Title>
           </Group>
-          {headerChildren}
+          {slots.header}
         </Flex>
       </AppShellHeader>
 
@@ -64,20 +69,24 @@ export default function AppShell({
           <Title order={4} component="p">
             Filter by
           </Title>
-          {navbarChildren.title}
+          {slots.navbarTitle}
         </Group>
-        {navbarChildren.body}
+        {slots.navbarBody}
       </AppShellNavbar>
 
       <AppShellMain>
         <SimpleGrid
-          cols={{ xs: 2, sm: 2, md: 3, xl: 4 }}
+          cols={{ xs: 2, sm: 3, md: 4 }}
           spacing="xs"
           p={{ base: 0, xs: "xs" }}
         >
           {children}
         </SimpleGrid>
       </AppShellMain>
+
+      <AppShellFooter hiddenFrom="md">
+        <div className={styles.footer}>{slots.footer}</div>
+      </AppShellFooter>
     </MantineAppShell>
   );
 }

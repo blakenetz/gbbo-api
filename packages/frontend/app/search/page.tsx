@@ -13,14 +13,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { recipes, total } = await fetchRecipeByQuery(params);
   const filterProps = await fetchFilters();
 
-  if (!recipes.length) {
-    return <Text>No recipes found</Text>;
-  }
   return (
     <AppShellClient paginationProps={{ total }} filterProps={filterProps}>
-      {recipes.map((recipe) => (
-        <Card key={recipe.id} recipe={recipe} />
-      ))}
+      {recipes.length ? (
+        recipes.map((recipe) => <Card key={recipe.id} recipe={recipe} />)
+      ) : (
+        <Text>No recipes found</Text>
+      )}
     </AppShellClient>
   );
 }

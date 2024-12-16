@@ -1,10 +1,10 @@
 "use client";
 
+import { ActionIcon, CloseButton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { SlidersHorizontal } from "lucide-react";
+import { Filters, FiltersProps, Pagination, PaginationProps } from "../index";
 import AppShell from "./appShell";
-import { Filters, FiltersProps } from "../index";
-import { CloseButton } from "@mantine/core";
-import { Pagination, PaginationProps } from "../index";
 
 interface AppShellClientProps {
   paginationProps: PaginationProps;
@@ -21,11 +21,19 @@ export default function AppShellClient({
   return (
     <AppShell
       navbarConfig={{ collapsed: { mobile: !opened } }}
-      navbarChildren={{
-        title: <CloseButton onClick={toggle} />,
-        body: <Filters {...filterProps} />,
+      slots={{
+        header: (
+          <>
+            <ActionIcon onClick={toggle} hiddenFrom="md">
+              <SlidersHorizontal />
+            </ActionIcon>
+            <Pagination {...paginationProps} visibleFrom="md" />
+          </>
+        ),
+        navbarTitle: <CloseButton onClick={toggle} hiddenFrom="md" />,
+        navbarBody: <Filters {...filterProps} />,
+        footer: <Pagination {...paginationProps} />,
       }}
-      headerChildren={<Pagination {...paginationProps} />}
     >
       {children}
     </AppShell>
