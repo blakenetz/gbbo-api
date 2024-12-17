@@ -12,3 +12,5 @@ RUN apt-get update && apt-get upgrade -y && \
   npm   
 
 RUN npm install
+RUN npm run turbo run setup
+RUN npm run turbo run scrape
