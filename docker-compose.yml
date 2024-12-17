@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=sqlite:///./sql_app.db
+      - DATABASE_URL=sqlite:///./gbbo.db
     volumes:
       - ./packages/api:/app
 

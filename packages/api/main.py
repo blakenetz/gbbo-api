@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from db import create_db_and_tables
 from routes import recipe_router, diet_router, baker_router, category_router, bake_type_router
-from util import get_logger 
+from util import get_logger
 
 logger = get_logger(__name__)
 

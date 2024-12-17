@@ -4,23 +4,24 @@
   "globalEnv": ["NODE_ENV"],
   "globalPassThroughEnv": ["*"],
   "tasks": {
+    "scrape": {
+      "dependsOn": ["setup"],
+      "outputs": ["dist/**"]
+    },
+    "setup": {
+      "cache": true,
+      "outputs": ["dist/**"]
+    },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["scrape", "^build"],
       "outputs": ["dist/**", ".next/**", "build/**"]
     },
     "lint": {
-      "outputs": []
+      "dependsOn": ["build"]
     },
     "dev": {
       "cache": false,
       "persistent": true
-    },
-    "scrape": {
-      "dependsOn": ["setup"],
-      "cache": false
-    },
-    "setup": {
-      "cache": false
     },
     "start": {
       "cache": false,
