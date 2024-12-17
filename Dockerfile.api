@@ -4,6 +4,8 @@ FROM node:20.11.0-alpine
 WORKDIR /app
 COPY . /app
 
+RUN apt-get update && apt-get install -y python3-pip && rm -rf /var/lib/apt/lists/*
+
 RUN pip install poetry
 RUN poetry install -C packages/scraper
 RUN poetry install -C packages/api
