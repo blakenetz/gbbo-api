@@ -11,15 +11,14 @@ import {
   TextInput,
   Tooltip,
 } from "@mantine/core";
+import { debounce } from "lodash";
 import { RotateCcw } from "lucide-react";
+import Form from "next/form";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { debounce } from "lodash";
-import styles from "./filters.module.css";
-import { CheckboxGroup, Multiselect } from "../index";
-
-import Form from "next/form";
 import { submitFilters } from "../../actions";
+import { CheckboxGroup, Multiselect } from "../index";
+import styles from "./filters.module.css";
 
 export interface FiltersProps {
   bakers: Baker[];
@@ -41,6 +40,7 @@ export default function Filters({
 
   const handleChange = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    debouncedSubmit.flush(); // flush the debounced state
     const formData = new FormData(e.currentTarget);
     if (e.target instanceof HTMLInputElement && e.target.type === "text") {
       // return early for search fields
