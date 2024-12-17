@@ -10,8 +10,10 @@ interface SearchPageProps {
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
-  const { recipes, total } = await fetchRecipeByQuery(params);
-  const filterProps = await fetchFilters();
+  const [{ recipes, total }, filterProps] = await Promise.all([
+    fetchRecipeByQuery(params),
+    fetchFilters(),
+  ]);
 
   return (
     <AppShellClient paginationProps={{ total }} filterProps={filterProps}>
