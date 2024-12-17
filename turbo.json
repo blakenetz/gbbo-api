@@ -13,7 +13,7 @@
       "outputs": ["dist/**"]
     },
     "build": {
-      "dependsOn": ["scrape", "^build"],
+      "dependsOn": ["^scrape", "^build"],
       "outputs": ["dist/**", ".next/**", "build/**"]
     },
     "lint": {
