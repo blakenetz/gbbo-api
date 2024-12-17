@@ -1,15 +1,22 @@
-FROM python:3.11.6-slim
-FROM node:20.11.0-alpine
+FROM python:3.11.6-slim AS python-base
+FROM node:20.11.0-alpine AS final
 
 WORKDIR /app
-COPY . /app
 
-RUN apt-get update && apt-get install -y python3-pip && rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+RUN apt-get update && \
+  apt-get install -y python3-pip && \
+  rm -rf /var/lib/apt/lists/*
 
+# Copy project files
+COPY . .
+
+# Install Python dependencies
 RUN pip install poetry
 RUN poetry install -C packages/scraper
 RUN poetry install -C packages/api
 
+# Install Node.js dependencies and run setup
 RUN npm install
 RUN npm run turbo run setup
 RUN npm run turbo run scrape
