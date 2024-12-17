@@ -4,6 +4,5 @@ WORKDIR /app
 COPY . /app
 
 RUN pip install poetry
-RUN poetry install
-
-CMD ["sleep", "5", ";", "poetry", "run", "gunicorn", "wsgi:app"]
+RUN poetry install -C packages/scraper
+RUN poetry install -C packages/api
