@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build --experimental-build-mode compile",
     "start": "next start",
     "lint": "next lint"
   },
@@ -14,8 +14,8 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.468.0",
     "next": "15.0.3",
-    "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106"
+    "react": "^19.0.0-rc-66855b96-20241106",
+    "react-dom": "^19.0.0-rc-66855b96-20241106"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.13",
