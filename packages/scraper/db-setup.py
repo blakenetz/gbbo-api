@@ -1,6 +1,5 @@
 import sqlite3
 import os
-
 from util import get_logger, get_db_file_path
 
 logger = get_logger(__name__)

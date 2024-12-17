@@ -238,13 +238,14 @@ class DataScraper(RecipeScraper):
     self.model = model
     self.value = value
     self.param = param if param else model
-    self.fk = param + '_id' if param else model.rstrip('s') + '_id'
+    self.fk = (model.replace('ies', 'y') if model.endswith('ies') else model.rstrip('s')) + '_id'
 
   def _generate_page_url(self, page_number: int) -> str:
     return f"{self.base_url}/page/{page_number}?{self.param}={self.value}"
   
   def _save_to_db(self, results: List[dict]) -> None:
     self.logger.debug('Saving to DB...')
+    self.logger.info(f"Saving {self.model} {self.value}")
     self.sql.execute(f'INSERT OR IGNORE INTO {self.model}(name) VALUES(?)', (self.value,) )
     model_id = self.sql.execute(f'SELECT id FROM {self.model} WHERE name = :name', { "name": self.value }).fetchone()[0]
 
@@ -267,7 +268,7 @@ def add_metadata() -> None:
   categories = soup.select('input[name="category"]')
   for category in categories:
     category_value = category.get('value')
-    if (category_value == 'All'):
+    if not category_value or category_value == 'All':
       continue
     categoryScraper = DataScraper('categories', category_value, 'category')
     categoryScraper.scrape()
@@ -275,7 +276,7 @@ def add_metadata() -> None:
   types = soup.select('input[name="type"]')
   for type in types:
     type_value = type.get('value')
-    if (type_value == 'All'):
+    if not type_value or type_value == 'All':
       continue
     typeScraper = DataScraper('bake_types', type_value, 'type')
     typeScraper.scrape()
