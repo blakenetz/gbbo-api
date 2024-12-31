@@ -1,6 +1,6 @@
 # GBBO API
 
-Scrapper and API for Great British Bake Off
+Monorepo for a Great British Bake Off rebuild
 
 Deployed at <https://frontend-production-9bf8.up.railway.app/>
 
