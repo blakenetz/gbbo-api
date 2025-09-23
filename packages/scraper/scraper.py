@@ -36,7 +36,7 @@ class WebScraper:
     self.connection = sqlite3.connect(db_file)
     self.sql = self.connection.cursor()
 
-    self.base_url = "https://thegreatbritishbakeoff.co.uk/recipes/all/"
+    self.base_url = "https://thegreatbritishbakeoff.co.uk/recipes/all"
     self.card_selector = "ADD-CARD-SELECTOR"
     self.max_page = max_page
     # uncomment to enable sql trace
@@ -47,16 +47,31 @@ class WebScraper:
   
   def _get_soup(self, url: str) -> BeautifulSoup:
     self.logger.debug('Initializing BeautifulSoup...')
-    page = requests.get(url)
+    headers = {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
+      'Accept-Encoding': 'gzip, deflate',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+    }
+    page = requests.get(url, headers=headers)
     soup = BeautifulSoup(page.content, "html.parser")
     return soup
   
   
   def _scrape_page(self, url: str, page: int) -> List[dict]:
     self.logger.debug('Scraping page...')
-    soup = self._get_soup(url)
-    cards = soup.find_all(class_=self.card_selector)
-    return self._extract_items(cards, page)
+    try:
+      soup = self._get_soup(url)
+      cards = soup.find_all(class_=self.card_selector)
+      return self._extract_items(cards, page)
+    except requests.RequestException as e:
+      self.logger.error(f"Request error on page {page}: {e}")
+      return []
+    except Exception as e:
+      self.logger.error(f"Unexpected error on page {page}: {e}")
+      return []
   
   def _extract_items(self, cards: ResultSet[PageElement], page: int) -> List[dict]: 
     self.logger.debug('Extracting items...')
@@ -85,8 +100,8 @@ class WebScraper:
         break
       
       page += 1
-      # we want 4 rps
-      time.sleep(.25)
+      # Increased delay to avoid rate limiting
+      time.sleep(2)
     
     self.logger.info(f"Total pages scraped: {page}")
     self.connection.close()
@@ -164,12 +179,15 @@ class RecipeScraper(WebScraper):
           baker_id = row[0]
 
       self.sql.execute(''' 
-                       INSERT INTO recipes(link, img, title, difficulty, time, baker_id) 
+                       INSERT OR IGNORE INTO recipes(link, img, title, difficulty, time, baker_id) 
                        VALUES(:link, :img, :title, :difficulty, :time, :baker_id)
                        ''', 
                        {**result, **{ "baker_id": baker_id }}
                        )
-      recipe_id = self.sql.lastrowid
+      
+      # Get recipe_id - either from new insert or existing record
+      recipe_row = self.sql.execute('SELECT id FROM recipes WHERE link = :link', result).fetchone()
+      recipe_id = recipe_row[0] if recipe_row else self.sql.lastrowid
       
       if len(result["diets"]) > 0:
         # insert into diets table
