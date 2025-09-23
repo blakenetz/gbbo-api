@@ -277,6 +277,102 @@ class DataScraper(RecipeScraper):
       
     self.connection.commit()
 
+class UpdateScraper:
+  def __init__(self):
+    self.logger = get_logger(__name__)
+    self.logger.debug('Initializing UpdateScraper...')
+    
+    # Config DB connection
+    db_file = get_db_file_path()
+    self.connection = sqlite3.connect(db_file)
+    self.sql = self.connection.cursor()
+
+  def _get_soup(self, url: str) -> BeautifulSoup:
+    headers = {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
+      'Accept-Encoding': 'gzip, deflate',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+    }
+    page = requests.get(url, headers=headers)
+    soup = BeautifulSoup(page.content, "html.parser")
+    return soup
+
+  def update_bakers(self) -> None:
+    """Update bakers by scraping all available series from the bakers page"""
+    self.logger.info('Updating bakers...')
+    
+    try:
+      # Get the bakers page to find all available series
+      soup = self._get_soup('https://thegreatbritishbakeoff.co.uk/bakers/')
+      
+      # Find the series navigation element
+      series_nav = soup.find('nav', id='series-category')
+      if not series_nav:
+        self.logger.error('Could not find series navigation element')
+        return
+      
+      # Extract all series links
+      series_links = series_nav.find_all('a')
+      series_urls = []
+      
+      for link in series_links:
+        href = link.get('href')
+        if href and 'series-' in href:
+          series_urls.append(href)
+      
+      self.logger.info(f'Found {len(series_urls)} series to scrape')
+      
+      # Scrape each series
+      for series_url in series_urls:
+        self.logger.info(f'Scraping series: {series_url}')
+        
+        # Use the existing BakerScraper to scrape this specific series
+        baker_scraper = BakerScraper()
+        baker_scraper.base_url = series_url
+        baker_scraper.scrape()
+        
+        # Add delay to avoid rate limiting
+        time.sleep(2)
+        
+    except Exception as e:
+      self.logger.error(f'Error updating bakers: {e}')
+
+  def update_recipes(self) -> None:
+    """Update recipes by checking for new content on the first few pages"""
+    self.logger.info('Updating recipes...')
+    
+    try:
+      # Get the latest recipes from the first few pages
+      recipe_scraper = RecipeScraper()
+      recipe_scraper.max_page = 5  # Limit to first 5 pages for updates
+      recipe_scraper.scrape()
+      
+    except Exception as e:
+      self.logger.error(f'Error updating recipes: {e}')
+
+  def update_metadata(self) -> None:
+    """Update categories and bake types metadata"""
+    self.logger.info('Updating metadata...')
+    
+    try:
+      add_metadata()
+    except Exception as e:
+      self.logger.error(f'Error updating metadata: {e}')
+
+  def update_all(self) -> None:
+    """Run all update operations"""
+    self.logger.info('Starting full update...')
+    
+    self.update_bakers()
+    self.update_recipes()
+    self.update_metadata()
+    
+    self.connection.close()
+    self.logger.info('Update completed!')
+
 # Iterate over remaining queries and add metadata fields
 def add_metadata() -> None:
   page = requests.get('https://thegreatbritishbakeoff.co.uk/recipes/all')
