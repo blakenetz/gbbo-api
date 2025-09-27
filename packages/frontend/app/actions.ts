@@ -1,5 +1,3 @@
-"use server";
-
 import { API_URL } from "@/util";
 
 export async function fetchRandomRecipe(quantity: number = 3) {

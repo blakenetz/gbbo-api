@@ -16,7 +16,7 @@
       "persistent": true
     },
     "scrape": {
-      "dependsOn": ["setup"],
+      "dependsOn": ["build","setup"],
       "cache": false
     },
     "scrape:update": {

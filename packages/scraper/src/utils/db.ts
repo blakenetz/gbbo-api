@@ -1,7 +1,6 @@
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import path from "path";
-// Using console for logging
 
 // Mirror Python util.py get_db_file_path -> ../../gbbo.db
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "../../gbbo.db");
@@ -15,7 +14,6 @@ export async function getDb() {
 
     // Enable foreign key constraints
     await db.get("PRAGMA foreign_keys = ON");
-
     return db;
   } catch (error) {
     console.error("Error initializing database:", error);
@@ -23,7 +21,7 @@ export async function getDb() {
   }
 }
 
-export async function runQuery<T = any>(
+export async function runQuery(
   query: string,
   params: any[] = []
 ): Promise<{ lastID: number; changes: number }> {
@@ -31,8 +29,8 @@ export async function runQuery<T = any>(
   try {
     const result = await db.run(query, params);
     return {
-      lastID: result.lastID || 0,
-      changes: result.changes || 0,
+      lastID: result.lastID ?? 0,
+      changes: result.changes ?? 0,
     };
   } catch (error) {
     console.error(`Error running query: ${query}`, { error, params });
@@ -77,7 +75,6 @@ export async function initializeDatabase(dropAndRecreate = false) {
   try {
     // Enable WAL mode for better concurrency
     await db.exec("PRAGMA journal_mode = WAL");
-
     if (dropAndRecreate) {
       await db.exec(`
         DROP TABLE IF EXISTS recipe_diets;

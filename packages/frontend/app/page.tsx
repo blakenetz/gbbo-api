@@ -4,6 +4,8 @@ import { fetchRandomRecipe } from "./actions";
 import styles from "./page.module.css";
 import { Form } from "./components";
 
+export const dynamic = "force-dynamic";
+
 const cols = 3;
 
 export default async function Home() {

@@ -11,11 +11,7 @@
     "lint": "turbo run lint",
     "setup": "turbo run setup",
     "turbo": "turbo",
-    "postinstall": "cd packages/api && poetry install && cd - >/dev/null 2>&1",
-    "scraper:build": "npm -w @gbbo/scraper run build",
-    "scraper:dev": "npm -w @gbbo/scraper run dev",
-    "scraper:scrape": "npm -w @gbbo/scraper run scrape",
-    "scraper:setup": "npm -w @gbbo/scraper run setup"
+    "postinstall": "cd packages/api && poetry install && cd - >/dev/null 2>&1"
   },
   "devDependencies": {
     "turbo": "^2.5.8"
