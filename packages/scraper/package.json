@@ -2,17 +2,30 @@
   "name": "@gbbo/scraper",
   "version": "0.1.0",
   "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "poetry": "poetry",
-    "scrape": "poetry run python main.py",
-    "scrape:update": "poetry run python update_main.py",
-    "setup": "poetry run python db-setup.py"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "scrape": "npm run build && npm run start",
+    "scrape:update": "npm run scrape",
+    "scrape:dev": "ts-node src/index.ts",
+    "setup": "ts-node src/db-setup.ts"
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "dotenv": "^17.2.2",
+    "jsdom": "^27.0.0",
+    "lodash": "^4.17.21",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@gbbo/frontend": "^0.1.0",
-    "@types/lodash": "^4.17.20"
+    "@types/jsdom": "^21.1.7",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^24.5.2",
+    "typescript": "^5.9.2"
   }
 }
