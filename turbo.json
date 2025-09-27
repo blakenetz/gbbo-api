@@ -19,6 +19,9 @@
       "dependsOn": ["setup"],
       "cache": false
     },
+    "scrape:update": {
+      "cache": false
+    },
     "setup": {
       "cache": false      
     }
