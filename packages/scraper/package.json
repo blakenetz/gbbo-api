@@ -6,10 +6,12 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "setup": "ts-node src/db-setup.ts"
+    "setup": "ts-node src/db-setup.ts",
+    "scrape": "ts-node src/index.ts"
   },
   "dependencies": {
     "dotenv": "^17.2.2",
+    "cheerio": "^1.0.0-rc.12",
     "jsdom": "^27.0.0",
     "lodash": "^4.17.21",
     "sqlite": "^5.1.1",

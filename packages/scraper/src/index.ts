@@ -1,18 +1,15 @@
-import 'dotenv/config';
-import BakerScraper from './scrapers/BakerScraper';
-import RecipeScraper from './scrapers/RecipeScraper';
-import { addMetadata } from './metadata';
+import "dotenv/config";
+import scrapeBakers from "./scrapers/BakerScraper";
+import scrapeRecipes from "./scrapers/RecipeScraper";
+import { addMetadata } from "./metadata";
 
 async function main() {
-  const bakerScraper = new BakerScraper();
-  const recipeScraper = new RecipeScraper();
-
   try {
-    await bakerScraper.scrape();
-    await recipeScraper.scrape();
+    await scrapeBakers();
+    await scrapeRecipes();
     await addMetadata();
   } catch (e) {
-    console.error('Scraping failed:', e);
+    console.error("Scraping failed:", e);
   }
 }
 

@@ -1,5 +1,5 @@
 import { JSDOM } from "jsdom";
-import DataScraper from "./scrapers/DataScraper";
+import scrapeData from "./scrapers/DataScraper";
 
 export async function addMetadata(): Promise<void> {
   const url = "https://thegreatbritishbakeoff.co.uk/recipes/all";
@@ -23,8 +23,7 @@ export async function addMetadata(): Promise<void> {
     for (const input of categoryInputs) {
       const value = input.getAttribute("value");
       if (!value || value === "All") continue;
-      const scraper = new DataScraper("categories", String(value), "category");
-      await scraper.scrape();
+      await scrapeData("categories", String(value), "category");
     }
 
     // Bake types
@@ -34,8 +33,7 @@ export async function addMetadata(): Promise<void> {
     for (const input of typeInputs) {
       const value = input.getAttribute("value");
       if (!value || value === "All") continue;
-      const scraper = new DataScraper("bake_types", String(value), "type");
-      await scraper.scrape();
+      await scrapeData("bake_types", String(value), "type");
     }
   } catch (e) {
     console.error("Failed to add metadata:", e);

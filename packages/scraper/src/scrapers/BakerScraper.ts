@@ -1,63 +1,61 @@
-import BaseScraper from './BaseScraper';
+import { scrape } from './BaseScraper';
 import { ScrapedItem } from '../types';
 import { runQuery } from '../utils/db';
+import type { CheerioAPI } from 'cheerio';
 
-export default class BakerScraper extends BaseScraper {
-  constructor() {
-    super({ maxPage: 1 });
-    this.baseUrl = "https://thegreatbritishbakeoff.co.uk/bakers";
-  }
+const BAKERS_BASE_URL = "https://thegreatbritishbakeoff.co.uk/bakers";
 
-  protected getCardSelector(): string {
-    return ".baker-avatars__group";
-  }
+function getCardSelectorBakers(): string {
+  return ".baker-avatars__group";
+}
 
-  protected async extractItems(cards: Element[]): Promise<ScrapedItem[]> {
-    const results: ScrapedItem[] = [];
+async function extractBakerItems($: CheerioAPI, cards: any[]): Promise<ScrapedItem[]> {
+  const results: ScrapedItem[] = [];
+  for (const card of cards) {
+    const $card = $(card);
+    try {
+      const seasonText = $card.find('.baker-avatars__group__title').text().trim() || '';
+      const parsedSeasonText = (seasonText.match(/\d+/g) || []).join('');
+      const season = parsedSeasonText ? parseInt(parsedSeasonText, 10) : null;
 
-    for (const card of cards) {
-      try {
-        const seasonEl = card.querySelector('.baker-avatars__group__title');
-        const seasonText = seasonEl?.textContent?.trim() || '';
-        const parsedSeasonText = (seasonText.match(/\d+/g) || []).join('');
-        const season = parsedSeasonText ? parseInt(parsedSeasonText, 10) : null;
+      const bakerEls = $card.find(".baker-avatars__list__item").toArray();
+      for (const bakerEl of bakerEls) {
+        const $imgEl = $(bakerEl).find("img").first();
+        if ($imgEl.length === 0) continue;
+        const img = $imgEl.attr("src") || "";
+        const name = $imgEl.attr("alt") || "";
+        if (!name || !img) continue;
 
-        const bakerEls = Array.from(
-          card.querySelectorAll(".baker-avatars__list__item")
-        );
-        for (const bakerEl of bakerEls) {
-          const imgEl = bakerEl.querySelector("img");
-          if (!imgEl) continue;
-          const img = imgEl.getAttribute("src") || "";
-          const name = imgEl.getAttribute("alt") || "";
-          if (!name || !img) continue;
-
-          results.push({
-            img,
-            name,
-            season,
-          });
-        }
-      } catch (err) {
-        console.error('Error processing baker card:', err);
-        continue;
+        results.push({ img, name, season });
       }
-    }
-
-    return results;
-  }
-
-  protected async saveToDatabase(items: ScrapedItem[]): Promise<void> {
-    for (const item of items) {
-      await runQuery(
-        "INSERT OR IGNORE INTO bakers(name, img, season) VALUES(?, ?, ?)",
-        [item.name, item.img, item.season ?? null]
-      );
+    } catch (err) {
+      console.error('Error processing baker card:', err);
+      continue;
     }
   }
+  return results;
+}
 
-  protected override generatePageUrl(_pageNumber: number): string {
-    // bakers page has all seasons on one page
-    return this.baseUrl;
+async function saveBakerItems(items: ScrapedItem[]): Promise<void> {
+  for (const item of items) {
+    await runQuery(
+      "INSERT OR IGNORE INTO bakers(name, img, season) VALUES(?, ?, ?)",
+      [item.name, item.img, item.season ?? null]
+    );
   }
+}
+
+function generateBakersPageUrl(_pageNumber: number, baseUrl: string): string {
+  // bakers page has all seasons on one page
+  return baseUrl;
+}
+
+export default async function scrapeBakers(): Promise<void> {
+  await scrape({
+    baseUrl: BAKERS_BASE_URL,
+    getCardSelector: getCardSelectorBakers,
+    extractItems: extractBakerItems,
+    saveToDatabase: saveBakerItems,
+    generatePageUrl: generateBakersPageUrl,
+  });
 }
