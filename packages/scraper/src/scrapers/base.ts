@@ -1,5 +1,5 @@
-import { load, type CheerioAPI } from 'cheerio';
-import { ScrapedItem } from '../types';
+import { load, type CheerioAPI } from "cheerio";
+import { ScrapedItem } from "../types";
 
 export type Helpers = {
   getTextContent: typeof getTextContent;
@@ -18,7 +18,11 @@ export type ScrapeConfig<Ctx = unknown> = {
     context?: Ctx
   ) => Promise<ScrapedItem[]>;
   saveToDatabase: (items: ScrapedItem[], context?: Ctx) => Promise<void>;
-  generatePageUrl?: (pageNumber: number, baseUrl: string, context?: Ctx) => string;
+  generatePageUrl?: (
+    pageNumber: number,
+    baseUrl: string,
+    context?: Ctx
+  ) => string;
 };
 
 const BATCH_SIZE = 10; // number of pages to process concurrently
@@ -28,7 +32,8 @@ async function fetchPage(url: string): Promise<CheerioAPI> {
     console.debug(`Fetching page: ${url}`);
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
       },
     });
     if (!res.ok) {
@@ -43,12 +48,13 @@ async function fetchPage(url: string): Promise<CheerioAPI> {
   }
 }
 
-
 function generatePageUrlDefault(pageNumber: number, baseUrl: string): string {
   return `${baseUrl}?page=${pageNumber}`;
 }
 
-export async function scrape<Ctx = unknown>(cfg: ScrapeConfig<Ctx>): Promise<void> {
+export async function scrape<Ctx = unknown>(
+  cfg: ScrapeConfig<Ctx>
+): Promise<void> {
   const baseUrl = cfg.baseUrl;
   const allItems: ScrapedItem[] = [];
 
@@ -56,18 +62,28 @@ export async function scrape<Ctx = unknown>(cfg: ScrapeConfig<Ctx>): Promise<voi
   // We don't know the max page; we stop when a full batch has no cards
   while (true) {
     const pages = Array.from({ length: BATCH_SIZE }, (_, i) => pageStart + i);
-    console.info(`Processing pages ${pageStart}-${pageStart + BATCH_SIZE - 1} concurrently`);
+    console.info(
+      `Processing pages ${pageStart}-${pageStart + BATCH_SIZE - 1} concurrently`
+    );
 
     try {
       const results = await Promise.all(
         pages.map(async (page) => {
-          const url = (cfg.generatePageUrl || generatePageUrlDefault)(page, baseUrl, cfg.context);
+          const url = (cfg.generatePageUrl || generatePageUrlDefault)(
+            page,
+            baseUrl,
+            cfg.context
+          );
           const $ = await fetchPage(url);
           const cards = $(cfg.getCardSelector(cfg.context)).toArray();
           if (cards.length === 0) {
             return { items: [] as ScrapedItem[], empty: true };
           }
-          const helpers: Helpers = { getTextContent, getAttribute, parseTimeToMinutes };
+          const helpers: Helpers = {
+            getTextContent,
+            getAttribute,
+            parseTimeToMinutes,
+          };
           const items = await cfg.extractItems($, cards, helpers, cfg.context);
           return { items, empty: items.length === 0 };
         })
@@ -77,13 +93,20 @@ export async function scrape<Ctx = unknown>(cfg: ScrapeConfig<Ctx>): Promise<voi
       for (const r of results) allItems.push(...r.items);
 
       if (!batchHadCards) {
-        console.info(`No cards found in batch ${pageStart}-${pageStart + BATCH_SIZE - 1}, ending scrape`);
+        console.info(
+          `No cards found in batch ${pageStart}-${
+            pageStart + BATCH_SIZE - 1
+          }, ending scrape`
+        );
         break;
       }
 
       pageStart += BATCH_SIZE;
     } catch (error) {
-      console.error(`Error processing batch ${pageStart}-${pageStart + BATCH_SIZE - 1}:`, error);
+      console.error(
+        `Error processing batch ${pageStart}-${pageStart + BATCH_SIZE - 1}:`,
+        error
+      );
       break;
     }
   }
@@ -92,7 +115,7 @@ export async function scrape<Ctx = unknown>(cfg: ScrapeConfig<Ctx>): Promise<voi
     console.info(`Saving ${allItems.length} items to database`);
     await cfg.saveToDatabase(allItems, cfg.context);
   } else {
-    console.warn('No items were scraped');
+    console.warn("No items were scraped");
   }
 }
 

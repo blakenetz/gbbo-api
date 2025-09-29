@@ -1,5 +1,5 @@
 import { JSDOM } from "jsdom";
-import scrapeData from "./scrapers/DataScraper";
+import scrapeData from "./scrapers/data";
 
 export async function addMetadata(): Promise<void> {
   const url = "https://thegreatbritishbakeoff.co.uk/recipes/all";

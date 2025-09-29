@@ -1,7 +1,7 @@
-import { scrape } from './BaseScraper';
-import { ScrapedItem } from '../types';
-import { runQuery } from '../utils/db';
-import type { CheerioAPI } from 'cheerio';
+import { scrape } from "./base";
+import { ScrapedItem } from "../types";
+import { runQuery } from "../utils/db";
+import type { CheerioAPI } from "cheerio";
 
 const BAKERS_BASE_URL = "https://thegreatbritishbakeoff.co.uk/bakers";
 
@@ -9,13 +9,17 @@ function getCardSelectorBakers(): string {
   return ".baker-avatars__group";
 }
 
-async function extractBakerItems($: CheerioAPI, cards: any[]): Promise<ScrapedItem[]> {
+async function extractBakerItems(
+  $: CheerioAPI,
+  cards: any[]
+): Promise<ScrapedItem[]> {
   const results: ScrapedItem[] = [];
   for (const card of cards) {
     const $card = $(card);
     try {
-      const seasonText = $card.find('.baker-avatars__group__title').text().trim() || '';
-      const parsedSeasonText = (seasonText.match(/\d+/g) || []).join('');
+      const seasonText =
+        $card.find(".baker-avatars__group__title").text().trim() || "";
+      const parsedSeasonText = (seasonText.match(/\d+/g) || []).join("");
       const season = parsedSeasonText ? parseInt(parsedSeasonText, 10) : null;
 
       const bakerEls = $card.find(".baker-avatars__list__item").toArray();
@@ -29,7 +33,7 @@ async function extractBakerItems($: CheerioAPI, cards: any[]): Promise<ScrapedIt
         results.push({ img, name, season });
       }
     } catch (err) {
-      console.error('Error processing baker card:', err);
+      console.error("Error processing baker card:", err);
       continue;
     }
   }

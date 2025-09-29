@@ -1,6 +1,6 @@
 import "dotenv/config";
-import scrapeBakers from "./scrapers/BakerScraper";
-import scrapeRecipes from "./scrapers/RecipeScraper";
+import scrapeBakers from "./scrapers/baker";
+import scrapeRecipes from "./scrapers/recipe";
 import { addMetadata } from "./metadata";
 
 async function main() {

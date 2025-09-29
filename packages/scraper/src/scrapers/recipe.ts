@@ -1,4 +1,4 @@
-import { scrape, Helpers } from "./BaseScraper";
+import { scrape, Helpers } from "./base";
 import type { CheerioAPI } from "cheerio";
 import { ScrapedItem } from "../types";
 import { getOne, runQuery } from "../utils/db";
@@ -9,7 +9,11 @@ function getCardSelectorRecipes(): string {
   return ".recipes-loop__item";
 }
 
-async function extractRecipeItems($: CheerioAPI, cards: any[], helpers: Helpers): Promise<ScrapedItem[]> {
+async function extractRecipeItems(
+  $: CheerioAPI,
+  cards: any[],
+  helpers: Helpers
+): Promise<ScrapedItem[]> {
   const results: ScrapedItem[] = [];
   for (const card of cards) {
     const $card = $(card);
@@ -29,11 +33,20 @@ async function extractRecipeItems($: CheerioAPI, cards: any[], helpers: Helpers)
 
       const $bakerImgEl = $content.find("img").first();
       const baker = $bakerImgEl.length
-        ? { name: $bakerImgEl.attr("alt") || "", img: $bakerImgEl.attr("src") || "" }
+        ? {
+            name: $bakerImgEl.attr("alt") || "",
+            img: $bakerImgEl.attr("src") || "",
+          }
         : null;
 
-      const difficultyText = ($content.find("[data-difficulty], .recipes-loop__item__difficulty").text() || "").trim();
-      const difficulty = difficultyText ? parseInt(difficultyText.replace(/[^0-9]/g, ""), 10) || null : null;
+      const difficultyText = (
+        $content
+          .find("[data-difficulty], .recipes-loop__item__difficulty")
+          .text() || ""
+      ).trim();
+      const difficulty = difficultyText
+        ? parseInt(difficultyText.replace(/[^0-9]/g, ""), 10) || null
+        : null;
 
       const diets = Array.from(
         new Set(
@@ -41,11 +54,16 @@ async function extractRecipeItems($: CheerioAPI, cards: any[], helpers: Helpers)
             .find("[title]")
             .toArray()
             .map((el: any) => $(el).attr("title")?.trim())
-            .filter((v: string | undefined): v is string => typeof v === "string" && v.toLowerCase() !== "all")
+            .filter(
+              (v: string | undefined): v is string =>
+                typeof v === "string" && v.toLowerCase() !== "all"
+            )
         )
       );
 
-      const timeText = ($card.find(".recipes-loop__item__time, time").text() || "").trim();
+      const timeText = (
+        $card.find(".recipes-loop__item__time, time").text() || ""
+      ).trim();
       const time = helpers.parseTimeToMinutes(timeText);
 
       results.push({ link, img, title, baker, difficulty, diets, time });
@@ -61,15 +79,15 @@ async function saveRecipeItems(items: ScrapedItem[]): Promise<void> {
   for (const result of items) {
     let bakerId: number | null = null;
     if (result.baker && result.baker.name && result.baker.img) {
-      const row = await getOne<{ id: number }>("SELECT id FROM bakers WHERE name = ? AND img = ?", [
-        result.baker.name,
-        result.baker.img,
-      ]);
+      const row = await getOne<{ id: number }>(
+        "SELECT id FROM bakers WHERE name = ? AND img = ?",
+        [result.baker.name, result.baker.img]
+      );
       if (!row) {
-        const insert = await runQuery("INSERT INTO bakers(name, img) VALUES(?, ?)", [
-          result.baker.name,
-          result.baker.img,
-        ]);
+        const insert = await runQuery(
+          "INSERT INTO bakers(name, img) VALUES(?, ?)",
+          [result.baker.name, result.baker.img]
+        );
         bakerId = insert.lastID;
       } else {
         bakerId = row.id;
@@ -79,18 +97,34 @@ async function saveRecipeItems(items: ScrapedItem[]): Promise<void> {
     await runQuery(
       `INSERT OR IGNORE INTO recipes(title, link, img, difficulty, time, baker_id)
          VALUES(?, ?, ?, ?, ?, ?)`,
-      [result.title, result.link, result.img, result.difficulty ?? null, result.time ?? null, bakerId]
+      [
+        result.title,
+        result.link,
+        result.img,
+        result.difficulty ?? null,
+        result.time ?? null,
+        bakerId,
+      ]
     );
 
-    const recipeRow = await getOne<{ id: number }>("SELECT id FROM recipes WHERE link = ?", [result.link]);
+    const recipeRow = await getOne<{ id: number }>(
+      "SELECT id FROM recipes WHERE link = ?",
+      [result.link]
+    );
     if (!recipeRow) continue;
     const recipeId = recipeRow.id;
 
     for (const diet of result.diets || []) {
       await runQuery("INSERT OR IGNORE INTO diets(name) VALUES(?)", [diet]);
-      const d = await getOne<{ id: number }>("SELECT id FROM diets WHERE name = ?", [diet]);
+      const d = await getOne<{ id: number }>(
+        "SELECT id FROM diets WHERE name = ?",
+        [diet]
+      );
       if (d) {
-        await runQuery("INSERT OR IGNORE INTO recipe_diets(recipe_id, diet_id) VALUES(?, ?)", [recipeId, d.id]);
+        await runQuery(
+          "INSERT OR IGNORE INTO recipe_diets(recipe_id, diet_id) VALUES(?, ?)",
+          [recipeId, d.id]
+        );
       }
     }
   }
