@@ -10,8 +10,7 @@
     "start": "turbo run start",
     "lint": "turbo run lint",
     "setup": "turbo run setup",
-    "turbo": "turbo",
-    "postinstall": "cd packages/api && poetry install && cd - >/dev/null 2>&1"
+    "turbo": "turbo"
   },
   "devDependencies": {
     "turbo": "^2.5.8"
