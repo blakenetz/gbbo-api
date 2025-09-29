@@ -1,0 +1,23 @@
+FROM node:20.11.0-alpine
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache python3 py3-pip  
+
+# Create a virtual environment
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy project files
+COPY . .
+
+# Install Python dependencies
+RUN pip install poetry
+RUN poetry install -C packages/scraper
+RUN poetry install -C packages/api
+
+# Install Node.js dependencies and run setup
+RUN npm install
+RUN npm run turbo run setup
+RUN npm run turbo run scrape

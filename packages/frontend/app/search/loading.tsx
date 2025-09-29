@@ -30,7 +30,7 @@ export default function SearchLoading() {
       }}
     >
       {Array.from({ length: 9 }).map((_, i) => (
-        <Skeleton key={i} width="250px" height="320px" radius="md" animate />
+        <Skeleton key={i} width="200px" height="320px" radius="md" animate />
       ))}
     </AppShell>
   );

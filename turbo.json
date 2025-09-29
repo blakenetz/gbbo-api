@@ -5,10 +5,11 @@
   "globalPassThroughEnv": ["*"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^scrape", "^build"],
       "outputs": ["dist/**", ".next/**", "build/**"]
     },
     "lint": {
+      "dependsOn": ["build"],
       "outputs": []
     },
     "dev": {
@@ -24,6 +25,10 @@
     },
     "setup": {
       "cache": false      
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
     }
   }
-} 
+}
