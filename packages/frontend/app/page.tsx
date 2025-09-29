@@ -13,7 +13,7 @@ const cols = 3;
 export default async function Home() {
   const [recipes, filterData] = await Promise.all([
     fetchRandomRecipe(cols),
-    fetchFilters()
+    fetchFilters(),
   ]);
 
   return (
@@ -30,15 +30,17 @@ export default async function Home() {
 
       <Form />
 
-      <QuickSearch 
+      <QuickSearch
         categories={filterData.categories}
         diets={filterData.diets}
         bakeTypes={filterData.bakeTypes}
       />
 
-      <Text>Need some inspiration...</Text>
+      <Title order={3} size="h4">
+        Need some inspiration...
+      </Title>
 
-      <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="xs" mt="xl">
+      <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="xs">
         {recipes.map((recipe) => (
           <Card key={recipe.id} recipe={recipe} />
         ))}

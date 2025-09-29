@@ -23,71 +23,92 @@ export default function QuickSearch({
   };
 
   return (
-    <Flex direction="column" gap="md" align="center" mt="xl">
-      <Title order={3}>Quick Search</Title>
-      <Text size="sm" c="dimmed">
-        Browse recipes by category, diet, or bake type
-      </Text>
+    <Flex
+      direction="column"
+      gap="xs"
+      justify="center"
+      align="center"
+      component="section"
+    >
+      <Title order={2} size="h4">
+        Quick Filters
+      </Title>
 
-      <Flex direction="column" gap="lg" w="100%" maw={800}>
-        {/* Categories */}
-        <Flex direction="column" gap="xs">
-          <Text fw={500} size="sm">
-            Categories
-          </Text>
-          <Flex wrap="wrap" gap="xs" style={{ minWidth: 0 }}>
-            {categories.slice(0, 6).map((category) => (
-              <Button
-                key={category.id}
-                variant="light"
-                size="sm"
-                onClick={() => handleQuickSearch("category", category.id)}
-                style={{ flexShrink: 0 }}
-              >
-                {category.name}
-              </Button>
-            ))}
-          </Flex>
+      {/* Categories */}
+      <Flex direction="column" align="flex-start">
+        <Text fw={500} size="sm" c="dimmed">
+          Categories
+        </Text>
+        <Flex
+          wrap="wrap"
+          gap="xs"
+          justify="flex-start"
+          align="flex-start"
+          w="100%"
+        >
+          {categories.map((category) => (
+            <Button
+              key={category.id}
+              variant="light"
+              size="sm"
+              onClick={() => handleQuickSearch("category", category.id)}
+              style={{ flexShrink: 0 }}
+            >
+              {category.name}
+            </Button>
+          ))}
         </Flex>
+      </Flex>
 
-        {/* Diets */}
-        <Flex direction="column" gap="xs">
-          <Text fw={500} size="sm">
-            Diets
-          </Text>
-          <Flex wrap="wrap" gap="xs" style={{ minWidth: 0 }}>
-            {diets.map((diet) => (
-              <Button
-                key={diet.id}
-                variant="light"
-                size="sm"
-                onClick={() => handleQuickSearch("diet", diet.id)}
-                style={{ flexShrink: 0 }}
-              >
-                {diet.name}
-              </Button>
-            ))}
-          </Flex>
+      {/* Diets */}
+      <Flex direction="column" align="flex-start">
+        <Text fw={500} size="sm" c="dimmed">
+          Diets
+        </Text>
+        <Flex
+          wrap="wrap"
+          gap="xs"
+          justify="flex-start"
+          align="flex-start"
+          w="100%"
+        >
+          {diets.map((diet) => (
+            <Button
+              key={diet.id}
+              variant="light"
+              size="sm"
+              onClick={() => handleQuickSearch("diet", diet.id)}
+              style={{ flexShrink: 0 }}
+            >
+              {diet.name}
+            </Button>
+          ))}
         </Flex>
+      </Flex>
 
-        {/* Bake Types */}
-        <Flex direction="column" gap="xs">
-          <Text fw={500} size="sm">
-            Bake Types
-          </Text>
-          <Flex wrap="wrap" gap="xs" style={{ minWidth: 0 }}>
-            {bakeTypes.map((bakeType) => (
-              <Button
-                key={bakeType.id}
-                variant="light"
-                size="sm"
-                onClick={() => handleQuickSearch("bake_type", bakeType.id)}
-                style={{ flexShrink: 0 }}
-              >
-                {bakeType.name}
-              </Button>
-            ))}
-          </Flex>
+      {/* Bake Types */}
+      <Flex direction="column" align="flex-start" w="100%">
+        <Text fw={500} size="sm" c="dimmed">
+          Bake Types
+        </Text>
+        <Flex
+          wrap="wrap"
+          gap="xs"
+          justify="flex-start"
+          align="flex-start"
+          w="100%"
+        >
+          {bakeTypes.map((bakeType) => (
+            <Button
+              key={bakeType.id}
+              variant="light"
+              size="sm"
+              onClick={() => handleQuickSearch("bake_type", bakeType.id)}
+              style={{ flexShrink: 0 }}
+            >
+              {bakeType.name}
+            </Button>
+          ))}
         </Flex>
       </Flex>
     </Flex>
