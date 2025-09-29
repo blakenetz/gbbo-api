@@ -1,4 +1,4 @@
-import { API_URL } from "@/util";
+import { API_URL, cacheConfig } from "@/util";
 
 export async function fetchRandomRecipe(quantity: number = 3) {
 	const response = await fetch(`${API_URL}/recipe/count`, cacheConfig);
