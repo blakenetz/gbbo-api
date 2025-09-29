@@ -12,6 +12,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy project files
 COPY . .
 
+# Install Node.js dependencies (provides local turbo binary)
+RUN npm ci
+
 # Install Python dependencies
 RUN pip install poetry
 WORKDIR /app/packages/api
