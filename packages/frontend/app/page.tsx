@@ -1,15 +1,20 @@
 import { Card } from "@/components";
 import { Flex, SimpleGrid, Text, Title } from "@mantine/core";
 import { fetchRandomRecipe } from "./actions";
+import { fetchFilters } from "./search/actions";
 import styles from "./page.module.css";
 import { Form } from "./components";
+import QuickSearch from "./components/quickSearch";
 
 export const dynamic = "force-dynamic";
 
 const cols = 3;
 
 export default async function Home() {
-  const recipes = await fetchRandomRecipe(cols);
+  const [recipes, filterData] = await Promise.all([
+    fetchRandomRecipe(cols),
+    fetchFilters()
+  ]);
 
   return (
     <Flex
@@ -24,6 +29,12 @@ export default async function Home() {
       <Text>A new way to search for Great British Bake Off recipes</Text>
 
       <Form />
+
+      <QuickSearch 
+        categories={filterData.categories}
+        diets={filterData.diets}
+        bakeTypes={filterData.bakeTypes}
+      />
 
       <Text>Need some inspiration...</Text>
 

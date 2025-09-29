@@ -1,5 +1,5 @@
 "use client";
-import { Baker, BakeType, Category, Diet } from "@/types";
+import type { Baker, BakeType, Category, Diet } from "@/types";
 import {
   ActionIcon,
   Avatar,
@@ -56,6 +56,16 @@ export default function Filters({
     icon: <Avatar src={baker.img} alt={baker.name} size="sm" />,
   }));
 
+  // Generate season options from bakers data, sorted from most recent first
+  const seasonOptions = [
+    ...new Set(bakers.map((baker) => baker.season).filter(Boolean))
+  ]
+    .sort((a, b) => (b || 0) - (a || 0))
+    .map((season) => ({
+      value: season?.toString() || "",
+      label: `Season ${season}`,
+    }));
+
   return (
     <Form
       action={submitFilters}
@@ -72,6 +82,16 @@ export default function Filters({
         data={bakersWithIcons}
         name="bakers"
         defaultValues={searchParams.get("baker_ids")?.split(",") ?? []}
+        grouped={true}
+      />
+
+      <Select
+        defaultValue={searchParams.get("season") ?? ""}
+        label="Season"
+        name="season"
+        placeholder="Select season"
+        data={seasonOptions}
+        clearable
       />
 
       <Select

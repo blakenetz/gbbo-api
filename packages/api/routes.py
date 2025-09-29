@@ -22,11 +22,12 @@ def get_recipes(
   diet_ids: Annotated[list[int], Query(description="List of diet ids. Available at GET /diets")] = None,
   category_ids: Annotated[list[int], Query(description="List of category ids. Available at GET /categories")] = None,
   bake_type_ids: Annotated[list[int], Query(description="List of bake type ids. Available at GET /bake_types")] = None,
+  season: Annotated[Optional[int], Query(description="Filter by baker season")] = None,
 ):
   return RecipeService.get_recipes(
     session, limit, skip, q, difficulty, 
      time, baker_ids, diet_ids,
-    category_ids, bake_type_ids
+    category_ids, bake_type_ids, season
   )
 
 @recipe_router.get("/count")
@@ -39,8 +40,9 @@ def get_recipe_count(
   diet_ids: Annotated[list[int], Query(description="List of diet ids. Available at GET /diets")] = None,
   category_ids: Annotated[list[int], Query(description="List of category ids. Available at GET /categories")] = None,
   bake_type_ids: Annotated[list[int], Query(description="List of bake type ids. Available at GET /bake_types")] = None,
+  season: Annotated[Optional[int], Query(description="Filter by baker season")] = None,
 ):
-  return RecipeService.get_recipe_count(session, q, difficulty, time, baker_ids, diet_ids, category_ids, bake_type_ids)
+  return RecipeService.get_recipe_count(session, q, difficulty, time, baker_ids, diet_ids, category_ids, bake_type_ids, season)
 
 @recipe_router.get("/{recipe_id}")
 def get_recipe_by_id(session: SessionDep, recipe_id: int):
