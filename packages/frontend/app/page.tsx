@@ -1,13 +1,20 @@
 import { Card } from "@/components";
 import { Flex, SimpleGrid, Text, Title } from "@mantine/core";
 import { fetchRandomRecipe } from "./actions";
+import { fetchFilters } from "./search/actions";
 import styles from "./page.module.css";
 import { Form } from "./components";
+import QuickSearch from "./components/quickSearch";
+
+export const dynamic = "force-dynamic";
 
 const cols = 3;
 
 export default async function Home() {
-  const recipes = await fetchRandomRecipe(cols);
+  const [recipes, filterData] = await Promise.all([
+    fetchRandomRecipe(cols),
+    fetchFilters(),
+  ]);
 
   return (
     <Flex
@@ -23,9 +30,17 @@ export default async function Home() {
 
       <Form />
 
-      <Text>Need some inspiration...</Text>
+      <QuickSearch
+        categories={filterData.categories}
+        diets={filterData.diets}
+        bakeTypes={filterData.bakeTypes}
+      />
 
-      <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="xs" mt="xl">
+      <Title order={3} size="h4">
+        Need some inspiration...
+      </Title>
+
+      <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="xs">
         {recipes.map((recipe) => (
           <Card key={recipe.id} recipe={recipe} />
         ))}

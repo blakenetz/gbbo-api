@@ -22,6 +22,13 @@ export default function CheckboxGroup({
   ...props
 }: CheckboxGroupProps) {
   const searchParams = useSearchParams();
+  const safeOptions = Array.isArray(options) ? options : [];
+  if (!Array.isArray(options)) {
+    console.warn(
+      "<CheckboxGroup> expected 'options' to be an array, received:",
+      options
+    );
+  }
 
   return (
     <Checkbox.Group
@@ -29,7 +36,7 @@ export default function CheckboxGroup({
       defaultValue={searchParams.get(searchParamName)?.split(",") ?? []}
     >
       <SimpleGrid cols={2} mt="xs">
-        {options.map(({ id, name }) => (
+        {safeOptions.map(({ id, name }) => (
           <Checkbox
             key={id}
             value={id.toString()}

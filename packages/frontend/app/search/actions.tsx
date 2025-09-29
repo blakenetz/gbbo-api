@@ -28,6 +28,7 @@ export async function submitFilters(formData: FormData) {
   const q = formData.get("q") as string;
   const difficulty = formData.get("difficulty") as string;
   const time = formData.get("time") as string;
+  const season = formData.get("season") as string;
   const bakers = formData.get("bakers") as string;
   const diets = formData.getAll("diets") as string[];
   const bakeTypes = formData.getAll("bake_types") as string[];
@@ -38,6 +39,7 @@ export async function submitFilters(formData: FormData) {
   if (q) searchParams.append("q", q);
   if (difficulty) searchParams.append("difficulty", difficulty);
   if (time && time !== "0") searchParams.append("time", time);
+  if (season) searchParams.append("season", season);
   if (bakers) searchParams.append("baker_ids", bakers);
   if (diets.length > 0) searchParams.append("diet_ids", diets.join(","));
   if (bakeTypes.length > 0)

@@ -3,21 +3,27 @@
 import { useState } from "react";
 import {
   Combobox,
-  ComboboxProps,
   Pill,
   PillsInput,
   useCombobox,
   Group,
   Text,
 } from "@mantine/core";
-import { BaseModel } from "@/types";
+import type { ComboboxProps } from "@mantine/core";
+import type { BaseModel } from "@/types";
 import { capitalize } from "lodash";
 import classes from "./multiselect.module.css";
 
+interface BakerWithIcon extends BaseModel {
+  icon: React.ReactNode;
+  season?: number | null;
+}
+
 interface SearchableMultiSelectProps {
-  data: (BaseModel & { icon: React.ReactNode })[];
+  data: BakerWithIcon[];
   name: string;
   defaultValues?: string[];
+  grouped?: boolean;
 }
 
 /**
@@ -28,6 +34,7 @@ export default function SearchableMultiSelect({
   data,
   name,
   defaultValues = [],
+  grouped = false,
 }: SearchableMultiSelectProps) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
@@ -62,37 +69,111 @@ export default function SearchableMultiSelect({
   };
 
   // break data into Pill and Combobox.Option elements
-  const { Pills, Options } = data.reduce<
-    Record<"Pills" | "Options", React.ReactNode[]>
-  >(
-    (acc, item) => {
-      const id = `${item.id}`;
+  const { Pills, Options } = (() => {
+    if (grouped) {
+      // Group bakers by season for grouped display
+      const groupedData = data.reduce((acc, item) => {
+        const season = item.season || "Unknown";
+        if (!acc[season]) {
+          acc[season] = [];
+        }
+        acc[season].push(item);
+        return acc;
+      }, {} as Record<string, BakerWithIcon[]>);
 
-      if (values.includes(id))
-        acc.Pills.push(
-          <Pill
-            key={id}
-            withRemoveButton
-            onRemove={() => handleValueRemove(id)}
-          >
-            {item.name}
-          </Pill>
-        );
-      else if (item.name.toLowerCase().includes(search.trim().toLowerCase())) {
-        acc.Options.push(
-          <Combobox.Option value={id} key={id}>
-            <Group>
-              {item.icon}
-              <Text size="sm">{item.name}</Text>
-            </Group>
-          </Combobox.Option>
-        );
-      }
+      // Sort seasons numerically from most recent first, with "Unknown" at the end
+      const sortedSeasons = Object.keys(groupedData).sort((a, b) => {
+        if (a === "Unknown") return 1;
+        if (b === "Unknown") return -1;
+        return Number(b) - Number(a);
+      });
 
-      return acc;
-    },
-    { Pills: [], Options: [] }
-  );
+      const pills: React.ReactNode[] = [];
+      const options: React.ReactNode[] = [];
+
+      // Process each season group
+      sortedSeasons.forEach((season) => {
+        const seasonItems = groupedData[season];
+
+        // Add season header if there are matching items
+        const hasMatchingItems = seasonItems.some((item) =>
+          item.name.toLowerCase().includes(search.trim().toLowerCase())
+        );
+
+        if (hasMatchingItems) {
+          options.push(
+            <Combobox.Group label={`Season ${season}`} key={`header-${season}`}>
+              {seasonItems.map((item) => {
+                const id = `${item.id}`;
+
+                if (values.includes(id)) {
+                  pills.push(
+                    <Pill
+                      key={id}
+                      withRemoveButton
+                      onRemove={() => handleValueRemove(id)}
+                    >
+                      {item.name}
+                    </Pill>
+                  );
+                  return null;
+                }
+
+                if (
+                  item.name.toLowerCase().includes(search.trim().toLowerCase())
+                ) {
+                  return (
+                    <Combobox.Option value={id} key={id}>
+                      <Group>
+                        {item.icon}
+                        <Text size="sm">{item.name}</Text>
+                      </Group>
+                    </Combobox.Option>
+                  );
+                }
+                return null;
+              })}
+            </Combobox.Group>
+          );
+        }
+      });
+
+      return { Pills: pills, Options: options };
+    } else {
+      // Original non-grouped logic
+      return data.reduce<Record<"Pills" | "Options", React.ReactNode[]>>(
+        (acc, item) => {
+          const id = `${item.id}`;
+
+          if (values.includes(id))
+            acc.Pills.push(
+              <Pill
+                key={id}
+                withRemoveButton
+                onRemove={() => handleValueRemove(id)}
+              >
+                {item.name}
+              </Pill>
+            );
+          else if (
+            item.name.toLowerCase().includes(search.trim().toLowerCase())
+          ) {
+            acc.Options.push(
+              <Combobox.Option value={id} key={id}>
+                <Group>
+                  {item.icon}
+                  <Text size="sm">{item.name}</Text>
+                </Group>
+              </Combobox.Option>
+            );
+          }
+
+          return acc;
+        },
+        { Pills: [], Options: [] }
+      );
+    }
+  })();
 
   return (
     <Combobox

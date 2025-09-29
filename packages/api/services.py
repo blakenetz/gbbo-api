@@ -38,7 +38,8 @@ class RecipeService:
     baker_ids: Optional[List[int]] = None,
     diet_ids: Optional[List[int]] = None,
     category_ids: Optional[List[int]] = None,
-    bake_type_ids: Optional[List[int]] = None
+    bake_type_ids: Optional[List[int]] = None,
+    season: Optional[int] = None
   ) -> SelectOfScalar[Recipe]:
     filters = [
       (q, lambda s: s.where(Recipe.title.contains(q))),
@@ -48,6 +49,7 @@ class RecipeService:
       (diet_ids, lambda s: s.where(RecipeDiet.diet_id.in_(diet_ids))),
       (category_ids, lambda s: s.where(RecipeCategory.category_id.in_(category_ids))),
       (bake_type_ids, lambda s: s.where(RecipeBakeType.bake_type_id.in_(bake_type_ids))),
+      (season, lambda s: s.join(Baker).where(Baker.season == season)),
     ]
     
     for condition, filter in filters:
@@ -91,7 +93,8 @@ class RecipeService:
     baker_ids: Optional[List[int]] = None,
     diet_ids: Optional[List[int]] = None,
     category_ids: Optional[List[int]] = None,
-    bake_type_ids: Optional[List[int]] = None
+    bake_type_ids: Optional[List[int]] = None,
+    season: Optional[int] = None
   ) -> List[dict]:
     """Fetch recipes with multiple filtering options."""
     statement = self._get_root_statement()
@@ -99,14 +102,11 @@ class RecipeService:
     statement = statement.offset(skip).limit(limit)
     
     # apply filters
-    statement = self._apply_filters(statement, q, difficulty, time, baker_ids, diet_ids, category_ids, bake_type_ids)
+    statement = self._apply_filters(statement, q, difficulty, time, baker_ids, diet_ids, category_ids, bake_type_ids, season)
 
     results = session.exec(statement).all()
-    
-    if not results:
-      raise HTTPException(status_code=404, detail="No recipes found")
-    
-    return [self._parse_recipe(result) for result in results]
+    # Return an empty array instead of 404 so clients can handle gracefully
+    return [self._parse_recipe(result) for result in results] if results else []
   
   @classmethod
   def get_recipe(
@@ -134,10 +134,11 @@ class RecipeService:
     baker_ids: Optional[List[int]] = None, 
     diet_ids: Optional[List[int]] = None, 
     category_ids: Optional[List[int]] = None, 
-    bake_type_ids: Optional[List[int]] = None
+    bake_type_ids: Optional[List[int]] = None,
+    season: Optional[int] = None
   ):
     statement = self._get_root_statement()
-    statement = self._apply_filters(statement, q, difficulty, time, baker_ids, diet_ids, category_ids, bake_type_ids)
+    statement = self._apply_filters(statement, q, difficulty, time, baker_ids, diet_ids, category_ids, bake_type_ids, season)
 
     statement = select(func.count()).select_from(statement)
     return session.exec(statement).first()
@@ -150,11 +151,8 @@ class GenericService:
       statement = statement.where(model.name.contains(q))
 
     results = session.exec(statement).all()
-    
-    if not results:
-      raise HTTPException(status_code=404, detail=f"No {model.__name__} found")
-    
-    return list(results)
+    # Always return a list (possibly empty) to keep response shape consistent
+    return list(results) if results else []
   
   @classmethod
   def get_item(self, model: Union[Baker, Diet, Category, BakeType], session: Session, id: int):

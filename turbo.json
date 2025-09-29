@@ -4,15 +4,6 @@
   "globalEnv": ["NODE_ENV"],
   "globalPassThroughEnv": ["*"],
   "tasks": {
-    "scrape": {
-      "cache": true,
-      "dependsOn": ["setup"],
-      "outputs": []
-    },
-    "setup": {
-      "cache": true,
-      "outputs": []
-    },
     "build": {
       "dependsOn": ["^scrape", "^build"],
       "outputs": ["dist/**", ".next/**", "build/**"]
@@ -24,6 +15,16 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "scrape": {
+      "dependsOn": ["build","setup"],
+      "cache": false
+    },
+    "scrape:update": {
+      "cache": false
+    },
+    "setup": {
+      "cache": false      
     },
     "start": {
       "cache": false,

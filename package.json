@@ -10,10 +10,14 @@
     "start": "turbo run start",
     "lint": "turbo run lint",
     "setup": "turbo run setup",
-    "turbo": "turbo"
+    "turbo": "turbo",
+    "postinstall": "cd packages/api && poetry install && cd - >/dev/null 2>&1"
   },
   "devDependencies": {
-    "turbo": "^2.3.3"
+    "turbo": "^2.5.8"
   },
-  "packageManager": "npm@10.8.2"
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "packageManager": "npm@11.6.1"
 }
