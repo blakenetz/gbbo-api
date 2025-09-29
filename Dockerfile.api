@@ -14,8 +14,10 @@ COPY . .
 
 # Install Python dependencies
 RUN pip install poetry
+WORKDIR /app/packages/api
 RUN poetry install
 
 # Execute 
+WORKDIR /app
 RUN npm run turbo run setup
 RUN npm run turbo run scrape
