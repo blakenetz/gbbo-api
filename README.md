@@ -1,6 +1,6 @@
 # GBBO API
 
-Monorepo with a FastAPI backend, a Next.js frontend, and a Python scraper for Great British Bake Off recipes.
+Monorepo with a FastAPI backend, a Next.js frontend, and a TypeScript scraper for Great British Bake Off recipes.
 
 ## Prerequisites
 
