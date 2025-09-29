@@ -13,6 +13,7 @@ Monorepo with a FastAPI backend, a Next.js frontend, and a TypeScript scraper fo
 
 1. Install dependencies at the root (also installs Python deps via postinstall):
    - `npm install`
+   - `cd packages/api && poetry install`
 2. Initialize the SQLite database (runs scraper setup):
    - `npm run setup`
 3. Start dev servers (API on 8000, frontend on 3000):
