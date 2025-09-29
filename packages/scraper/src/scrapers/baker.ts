@@ -3,35 +3,41 @@ import { ScrapedItem } from "../types";
 import { runQuery } from "../utils/db";
 import type { CheerioAPI } from "cheerio";
 
-const BAKERS_BASE_URL = "https://thegreatbritishbakeoff.co.uk/bakers";
-
-function getCardSelectorBakers(): string {
-  return ".baker-avatars__group";
-}
-
 async function extractBakerItems(
   $: CheerioAPI,
   cards: any[]
 ): Promise<ScrapedItem[]> {
   const results: ScrapedItem[] = [];
+  // Attempt to infer season from page headings (e.g., "Series 16")
+  let season: number | null = null;
+  try {
+    const headingText = [
+      $('h1').text(),
+      $('h2').text(),
+      $('.page-title').text(),
+      $('.hero__title').text(),
+    ]
+      .join(' ')
+      .trim();
+    const m = /series\s*(\d+)/i.exec(headingText);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      if (!Number.isNaN(n)) season = n;
+    }
+  } catch {}
   for (const card of cards) {
     const $card = $(card);
     try {
-      const seasonText =
-        $card.find(".baker-avatars__group__title").text().trim() || "";
-      const parsedSeasonText = (seasonText.match(/\d+/g) || []).join("");
-      const season = parsedSeasonText ? parseInt(parsedSeasonText, 10) : null;
+      // Tiles are structured as <article class="featured-block"> with <a><div.img><img/></div><div.details><h3></h3></div></a>
+      const $a = $card.find('a').first();
+      const $img = $a.find('img').first();
+      const img = ($img.attr('src') || '').trim();
+      let name = ($a.find('h3').first().text() || '').trim();
+      if (!name) name = ($a.attr('title') || '').trim();
+      if (!name) name = ($img.attr('alt') || '').trim();
+      if (!name || !img) continue;
 
-      const bakerEls = $card.find(".baker-avatars__list__item").toArray();
-      for (const bakerEl of bakerEls) {
-        const $imgEl = $(bakerEl).find("img").first();
-        if ($imgEl.length === 0) continue;
-        const img = $imgEl.attr("src") || "";
-        const name = $imgEl.attr("alt") || "";
-        if (!name || !img) continue;
-
-        results.push({ img, name, season });
-      }
+      results.push({ img, name, season });
     } catch (err) {
       console.error("Error processing baker card:", err);
       continue;
@@ -49,15 +55,17 @@ async function saveBakerItems(items: ScrapedItem[]): Promise<void> {
   }
 }
 
-function generateBakersPageUrl(_pageNumber: number, baseUrl: string): string {
-  // bakers page has all seasons on one page
-  return baseUrl;
+function generateBakersPageUrl(pageNumber: number, baseUrl: string): string {
+  // Site uses per-series pages: e.g., /bakers/series-16/
+  // Map pageNumber -> series-{pageNumber}
+  const n = Math.max(1, pageNumber);
+  return `${baseUrl}-${n}/`;
 }
 
 export default async function scrapeBakers(): Promise<void> {
   await scrape({
-    baseUrl: BAKERS_BASE_URL,
-    getCardSelector: getCardSelectorBakers,
+    baseUrl: "https://thegreatbritishbakeoff.co.uk/bakers/series",
+    getCardSelector: () => "article.featured-block",
     extractItems: extractBakerItems,
     saveToDatabase: saveBakerItems,
     generatePageUrl: generateBakersPageUrl,

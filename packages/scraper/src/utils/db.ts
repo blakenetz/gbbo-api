@@ -2,8 +2,9 @@ import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import path from "path";
 
-// Mirror Python util.py get_db_file_path -> ../../gbbo.db
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, "../../gbbo.db");
+// Mirror Python API db path -> repo root gbbo.db
+// From src/utils -> ../../../../gbbo.db
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, "../../../../gbbo.db");
 
 export async function getDb() {
   try {

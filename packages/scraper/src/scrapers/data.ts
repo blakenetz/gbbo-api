@@ -5,16 +5,12 @@ import type { CheerioAPI } from "cheerio";
 
 type Model = "categories" | "bake_types" | "diets";
 
-const RECIPES_BASE_URL = "https://thegreatbritishbakeoff.co.uk/recipes/all";
 type DataContext = {
   model: Model;
   value: string;
   queryParam: string;
   fk: string;
 };
-function getCardSelectorData(): string {
-  return ".recipes-loop__item";
-}
 
 async function extractDataItems(
   $: CheerioAPI,
@@ -103,17 +99,24 @@ export default async function scrapeData(
   value: string,
   param?: string
 ): Promise<void> {
+  // Map model to its FK column in the join table
+  const fkByModel: Record<Model, string> = {
+    categories: "category_id",
+    bake_types: "bake_type_id",
+    diets: "diet_id",
+  };
   const context: DataContext = {
     model,
     value,
     queryParam: param || model,
-    fk: param ? `${param}_id` : `${model.replace(/s$/, "")}_id`,
+    // Use explicit mapping to avoid incorrect singularization (e.g., categories -> category_id)
+    fk: fkByModel[model],
   };
 
   await scrape<DataContext>({
-    baseUrl: RECIPES_BASE_URL,
+    baseUrl: "https://thegreatbritishbakeoff.co.uk/recipes/all",
     context,
-    getCardSelector: getCardSelectorData,
+    getCardSelector: () => ".recipes-loop__item",
     extractItems: extractDataItems,
     saveToDatabase: saveDataItems,
     generatePageUrl: generateDataPageUrl,

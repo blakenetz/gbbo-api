@@ -102,11 +102,8 @@ class RecipeService:
     statement = self._apply_filters(statement, q, difficulty, time, baker_ids, diet_ids, category_ids, bake_type_ids)
 
     results = session.exec(statement).all()
-    
-    if not results:
-      raise HTTPException(status_code=404, detail="No recipes found")
-    
-    return [self._parse_recipe(result) for result in results]
+    # Return an empty array instead of 404 so clients can handle gracefully
+    return [self._parse_recipe(result) for result in results] if results else []
   
   @classmethod
   def get_recipe(
@@ -150,11 +147,8 @@ class GenericService:
       statement = statement.where(model.name.contains(q))
 
     results = session.exec(statement).all()
-    
-    if not results:
-      raise HTTPException(status_code=404, detail=f"No {model.__name__} found")
-    
-    return list(results)
+    # Always return a list (possibly empty) to keep response shape consistent
+    return list(results) if results else []
   
   @classmethod
   def get_item(self, model: Union[Baker, Diet, Category, BakeType], session: Session, id: int):
