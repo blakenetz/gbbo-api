@@ -2,7 +2,7 @@ name: Deploy to Cloudflare
 
 on:
   push:
-    branches: [main, feat/cloudflare-migration] # TODO: Remove feat/cloudflare-migration after testing
+    branches: [main]
   workflow_dispatch:
 
 jobs:
