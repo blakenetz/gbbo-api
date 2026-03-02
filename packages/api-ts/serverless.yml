@@ -1,0 +1,44 @@
+# GBBO API – AWS Lambda + API Gateway (HTTP API)
+# Deploy: npm run build && npx serverless deploy (from packages/api-ts)
+# Requires: DATABASE_URL in env or AWS SSM/Secrets Manager
+
+service: gbbo-api
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${opt:region, "us-east-1"}
+  memorySize: 256
+  timeout: 30
+  environment:
+    NODE_OPTIONS: "--enable-source-maps"
+  # Set DATABASE_URL via: serverless deploy --param="DATABASE_URL=postgresql://..."
+  # Or use SSM: environment.DATABASE_URL: ${ssm:/gbbo-api/DATABASE_URL~true}
+
+functions:
+  api:
+    handler: dist/handler.handler
+    description: GBBO Recipe API (Hono on Lambda)
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+      - httpApi:
+          path: /
+          method: GET
+    # If RDS is in a VPC, set so Lambda can reach it:
+    # vpc:
+    #   securityGroupIds: [sg-xxx]
+    #   subnetIds: [subnet-xxx, subnet-yyy]
+
+package:
+  patterns:
+    - "dist/**"
+    - "node_modules/**"
+    - "!node_modules/@types/**"
+    - "!src/**"
+    - "!*.ts"
+    - "!build.mjs"
+    - "!tsconfig.json"

@@ -1,0 +1,29 @@
+{
+  "name": "@gbbo/api-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/local.ts",
+    "build": "node build.mjs",
+    "start": "node dist/local.js",
+    "deploy": "npm run build && npx serverless deploy",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.12",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/pg": "^8.11.10",
+    "esbuild": "^0.24.0",
+    "serverless": "^3.38.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  }
+}
