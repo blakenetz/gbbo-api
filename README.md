@@ -1,54 +1,94 @@
 # GBBO API
 
-Monorepo with a FastAPI backend, a Next.js frontend, and a TypeScript scraper for Great British Bake Off recipes.
+Monorepo with a Cloudflare Workers API, a Next.js frontend, and a TypeScript scraper for Great British Bake Off recipes.
+
+## Architecture
+
+- **Frontend**: Next.js 16 (static export for Cloudflare Pages)
+- **API**: Cloudflare Workers with TypeScript + Hono
+- **Database**: Cloudflare D1 (SQLite-compatible)
+- **Scraper**: TypeScript/Node.js for data collection
 
 ## Prerequisites
 
 - Node.js and npm (repo uses `npm@11`)
-- Python 3.9
-- Poetry (for Python deps)
-- Optional: Docker and Docker Compose
+- Cloudflare CLI (for deployment): `npm install -g wrangler`
 
 ## Getting Started (local)
 
-1. Install dependencies at the root (also installs Python deps via postinstall):
+1. Install dependencies:
    - `npm install`
-   - `cd packages/api && poetry install`
-2. Initialize the SQLite database (runs scraper setup):
-   - `npm run setup`
-3. Start dev servers (API on 8000, frontend on 3000):
-   - `npm run dev`
+
+2. Build all packages:
+   - `npm run build`
+
+3. Start local development:
+   - Frontend: `cd packages/frontend && npm run dev`
+   - Workers API: `cd packages/api-workers && npm run dev`
+
+## Deployment
+
+### Automatic (GitHub Actions)
+
+1. Add GitHub secrets:
+   - `CLOUDFLARE_API_TOKEN`
+   - `CLOUDFLARE_ACCOUNT_ID`
+
+2. Push to `feat/cloudflare-migration` branch to trigger deployment.
+
+### Manual (CLI)
+
+1. Create D1 database (once):
+
+   ```bash
+   cd packages/api-workers
+   npx wrangler d1 create gbbo-db
+   # Copy database_id into wrangler.toml
+   ```
+
+2. Apply schema and import data:
+
+   ```bash
+   npx wrangler d1 migrations apply gbbo-db --env production
+   node scripts/export-data.js
+   node scripts/import-data.js
+   npx wrangler d1 execute gbbo-db --env production --file migrations/0002_import_data.sql
+   ```
+
+3. Deploy:
+   ```bash
+   npm run deploy
+   ```
+
+## Package Scripts
 
 Root scripts (powered by Turborepo):
 
-- `npm run dev` — runs `dev` in all packages
 - `npm run build` — builds all packages
-- `npm run start` — starts all packages
+- `npm run dev` — runs dev servers (where applicable)
+- `npm run start` — starts production servers
 - `npm run lint` — lints all packages
-- `npm run setup` — runs setup tasks (e.g., DB init via scraper)
+- `npm run setup` — runs setup tasks
 
-## Using Docker
+### Individual Packages
 
-You can run both services with Docker:
+- **Frontend** (`packages/frontend`):
+  - `npm run dev` — Next.js dev server
+  - `npm run build` — Build for static export
 
-- `docker compose up --build`
+- **API Workers** (`packages/api-workers`):
+  - `npm run dev` — Local Workers dev
+  - `npm run deploy` — Deploy to Cloudflare
 
-Services/ports (see `docker-compose.yml`):
-
-- API: http://localhost:8000
-- Frontend: http://localhost:3000 (expects `NEXT_PUBLIC_API_URL=http://localhost:8000`)
-
-## Packages
-
-- `packages/api` — FastAPI app with SQLModel/SQLite
-- `packages/frontend` — Next.js app (Mantine UI)
-- `packages/scraper` — Python scraper and DB setup utilities
+- **Scraper** (`packages/scraper`):
+  - `npm run scrape` — Run data scraper
+  - `npm run setup` — Initialize database
 
 ## API Overview
 
-Base URL (local): `http://localhost:8000`
+Base URL (deployed): `https://gbbo-api.your-subdomain.workers.dev`
 
-Routers and key routes:
+Routes:
 
 - `/recipe`
   - `GET /recipe` — list recipes with filters: `q`, `difficulty` (1-3), `time` (minutes), `baker_ids`, `diet_ids`, `category_ids`, `bake_type_ids`
@@ -61,35 +101,20 @@ Routers and key routes:
 - `/diet`, `/category`, `/bake_type`
   - Each supports: `GET /` (list with `q`), `GET /count`, `GET /{id}`
 
-CORS: frontend origin `http://localhost:3000` is allowed in dev.
+## Cost Savings
 
-## Scraper
+Migrated from Railway ($5/month) to Cloudflare ($0-2/month):
 
-From the root you can run via Turbo:
+| Service  | Old        | New          | Savings |
+| -------- | ---------- | ------------ | ------- |
+| Platform | Railway $5 | Workers $0-2 | $3-5    |
+| Database | Included   | D1 Free      | $0      |
+| Frontend | Included   | Pages Free   | $0      |
 
-- Setup/DB init: `npm run setup`
+## Migration Status
 
-Or directly in the scraper package:
-
-- `cd packages/scraper`
-- Initialize DB: `npm run setup`
-- Scrape data: `npm run scrape`
-
-## Configuration
-
-- Database: SQLite (see API `db.py`). Docker compose sets `DATABASE_URL=sqlite:///./sql_app.db` for container runs.
-- Frontend -> API URL: `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:8000` in Docker compose).
-
-## Project Layout
-
-```
-packages/
-  api/        # FastAPI app
-  frontend/   # Next.js app
-  scraper/    # Python scraper & DB setup
-```
-
-## Development Notes
-
-- Python version is pinned to 3.9 in Poetry configs.
-- If ports are busy, adjust `docker-compose.yml` or package scripts.
+✅ Frontend converted to static export
+✅ Workers API implemented
+✅ D1 database schema created
+✅ GitHub Actions deployment configured
+⏳ Final testing and production deployment

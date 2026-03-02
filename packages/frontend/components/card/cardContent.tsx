@@ -48,23 +48,21 @@ function Difficulty({ recipe }: CardContentProps) {
   if (!difficulty) return <span />; // empty span to keep the justify-between consistent
 
   return (
-    <Anchor
-      className={styles.link}
-      component={Link}
-      href={`/search?difficulty=${recipe.difficulty}`}
-    >
-      <ThemeIcon color={difficulty.color} size="sm" variant="white">
-        <difficulty.icon />
-      </ThemeIcon>
-      <Text c={difficulty.color}>{difficulty.label}</Text>
-    </Anchor>
+    <Link href={`/search?difficulty=${recipe.difficulty}`}>
+      <Anchor className={styles.link} component="span">
+        <ThemeIcon color={difficulty.color} size="sm" variant="white">
+          <difficulty.icon />
+        </ThemeIcon>
+        <Text c={difficulty.color}>{difficulty.label}</Text>
+      </Anchor>
+    </Link>
   );
 }
 
 function Diets({ recipe }: CardContentProps) {
-  return recipe.diets.length > 0 ? (
+  return (recipe.diets?.length ?? 0) > 0 ? (
     <Flex gap="xs" px="xs" className={styles.diet}>
-      {recipe.diets.map((diet) => (
+      {(recipe.diets ?? []).map((diet) => (
         <Diet diet={diet} key={diet.id} />
       ))}
     </Flex>
@@ -73,7 +71,7 @@ function Diets({ recipe }: CardContentProps) {
 
 export default function CardContent({ recipe }: CardContentProps) {
   const time = formatTime(recipe.time);
-  const category = recipe.categories.find(({ id }) => id <= 4);
+  const category = recipe.categories?.find(({ id }) => id <= 4);
 
   // display in single line
   if (!category && !time) {
@@ -91,17 +89,18 @@ export default function CardContent({ recipe }: CardContentProps) {
         <Difficulty recipe={recipe} />
 
         {category && (
-          <Button
-            variant="gradient"
-            gradient={{ ...categoryColors[category.id], deg: 330 }}
-            size="compact-sm"
-            radius="xs"
-            component={Link}
-            href={`/search?category_ids=${category.id}`}
-            autoContrast
-          >
-            {category.name}
-          </Button>
+          <Link href={`/search?category_ids=${category.id}`}>
+            <Button
+              variant="gradient"
+              gradient={{ ...categoryColors[category.id], deg: 330 }}
+              size="compact-sm"
+              radius="xs"
+              autoContrast
+              component="span"
+            >
+              {category.name}
+            </Button>
+          </Link>
         )}
       </Flex>
 

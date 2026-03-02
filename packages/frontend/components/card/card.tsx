@@ -24,13 +24,13 @@ export default function Card({ recipe }: CardProps) {
         <Image src={recipe.img} height={160} alt={recipe.title} />
         {recipe.baker?.id && (
           <Tooltip label={recipe.baker.name} position="bottom">
-            <Avatar
-              src={recipe.baker.img}
-              className={styles.avatar}
-              component={Link}
-              href={`/search?baker_ids=${recipe.baker.id}`}
-              variant="outline"
-            />
+            <Link href={`/search?baker_ids=${recipe.baker.id}`}>
+              <Avatar
+                src={recipe.baker.img}
+                className={styles.avatar}
+                variant="outline"
+              />
+            </Link>
           </Tooltip>
         )}
       </div>

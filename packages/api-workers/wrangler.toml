@@ -1,0 +1,29 @@
+name = "gbbo-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+vars = { ENVIRONMENT = "development" }
+
+# Top-level D1 for local dev (used by wrangler dev and d1 migrations --local)
+# For local-only: use placeholder ID. Run `wrangler d1 create gbbo-db` and add the
+# returned database_id here for remote/production use.
+[[d1_databases]]
+binding = "DB"
+database_name = "gbbo-db"
+database_id = "00000000-0000-0000-0000-000000000001"
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "gbbo-db"
+database_id = "${CLOUDFLARE_D1_DATABASE_ID}"
+
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "gbbo-db-dev"
+database_id = ""
