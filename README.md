@@ -2,6 +2,8 @@
 
 Monorepo with a Cloudflare Workers API, a Next.js frontend, and a TypeScript scraper for Great British Bake Off recipes.
 
+Deployed @ <https://gbbo-frontend.pages.dev/>
+
 ## Architecture
 
 - **Frontend**: Next.js 16 (static export for Cloudflare Pages)
