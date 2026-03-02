@@ -10,11 +10,11 @@
     "d1:local": "wrangler d1 migrations apply gbbo-db --local"
   },
   "dependencies": {
-    "hono": "^4.0.0"
+    "hono": "^4.12.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240208.0",
+    "@cloudflare/workers-types": "^4.20260301.1",
     "sqlite3": "^5.1.7",
-    "wrangler": "^3.0.0"
+    "wrangler": "^4.69.0"
   }
 }
