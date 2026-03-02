@@ -41,17 +41,15 @@ export const DietIcon = createPolymorphicComponent<"button", DietIconProps>(
         <Icon />
       </ActionIcon>
     );
-  }
+  },
 );
 
 export default function Diet({ diet }: DietIconProps) {
   return (
     <Tooltip label={diet.name} position="bottom">
-      <DietIcon
-        diet={diet}
-        component={Link}
-        href={`/search?diet_ids=${diet.id}`}
-      />
+      <Link href={`/search?diet_ids=${diet.id}`}>
+        <DietIcon diet={diet} />
+      </Link>
     </Tooltip>
   );
 }

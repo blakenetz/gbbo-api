@@ -1,16 +1,25 @@
 "use client";
 import { Loader, TextInput } from "@mantine/core";
-import { useActionState } from "react";
+import { useState } from "react";
 
 interface FormClientProps {
-  action: (_state: null, formData: FormData) => Promise<null>;
+  onSubmit: (query: string) => void;
 }
 
-export default function FormClient({ action }: FormClientProps) {
-  const [_state, formAction, isPending] = useActionState(action, null);
+export default function FormClient({ onSubmit }: FormClientProps) {
+  const [isPending, setIsPending] = useState(false);
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const query = formData.get("q") as string;
+
+    setIsPending(true);
+    onSubmit(query);
+  }
 
   return (
-    <form action={formAction}>
+    <form onSubmit={handleSubmit}>
       <TextInput
         placeholder="Search for a recipe"
         name="q"

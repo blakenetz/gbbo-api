@@ -1,0 +1,8 @@
+name = "gbbo-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gbbo-db"
+database_id = "42e17f6c-b018-406f-a1e0-17c59b793556"

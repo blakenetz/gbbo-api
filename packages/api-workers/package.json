@@ -1,0 +1,20 @@
+{
+  "name": "@gbbo/api-workers",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "deploy": "wrangler deploy",
+    "d1:create": "wrangler d1 create gbbo-db",
+    "d1:migrate": "wrangler d1 migrations apply gbbo-db",
+    "d1:local": "wrangler d1 migrations apply gbbo-db --local"
+  },
+  "dependencies": {
+    "hono": "^4.12.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260301.1",
+    "sqlite3": "^5.1.7",
+    "wrangler": "^4.69.0"
+  }
+}
