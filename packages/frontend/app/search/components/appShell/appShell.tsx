@@ -47,15 +47,11 @@ export default function AppShell({
       <AppShellHeader>
         <Flex h="100%" px="md" justify="space-between" align="center">
           <Group>
-            <ActionIcon
-              component={Link}
-              href="/"
-              variant="subtle"
-              radius="xl"
-              size="lg"
-            >
-              <ChefHat />
-            </ActionIcon>
+            <Link href="/">
+              <ActionIcon variant="subtle" radius="xl" size="lg">
+                <ChefHat />
+              </ActionIcon>
+            </Link>
             <Title order={4} component="h1">
               GBBO Recipes
             </Title>

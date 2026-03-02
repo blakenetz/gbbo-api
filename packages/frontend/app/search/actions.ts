@@ -1,8 +1,6 @@
-"use server";
 import { Recipe, RecipeSearchParams } from "@/types";
 import { API_URL, cacheConfig, paginationAmount } from "@/util";
 import { Diet, Baker, BakeType, Category } from "@/types";
-import { redirect } from "next/navigation";
 
 export async function fetchFilters(): Promise<{
   bakers: Baker[];
@@ -24,7 +22,7 @@ export async function fetchFilters(): Promise<{
   return { bakers, diets, bakeTypes, categories };
 }
 
-export async function submitFilters(formData: FormData) {
+export function submitFilters(formData: FormData) {
   const q = formData.get("q") as string;
   const difficulty = formData.get("difficulty") as string;
   const time = formData.get("time") as string;
@@ -48,7 +46,7 @@ export async function submitFilters(formData: FormData) {
     searchParams.append("category_ids", categories.join(","));
 
   if (searchParams.size > 0) {
-    redirect(`/search?${searchParams.toString()}`);
+    window.location.href = `/search?${searchParams.toString()}`;
   }
 }
 
@@ -84,7 +82,13 @@ export async function fetchRecipeByQuery(
     fetch(`${API_URL}/recipe/count?${queryParams.toString()}`),
   ]);
 
-  const [recipes, total] = await Promise.all(responses.map((r) => r.json()));
+  const [recipesData, countData] = await Promise.all(
+    responses.map((r) => r.json())
+  );
+  const total =
+    typeof countData === "object" && "count" in countData
+      ? countData.count
+      : countData;
 
-  return { recipes, total };
+  return { recipes: recipesData, total };
 }

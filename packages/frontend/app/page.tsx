@@ -1,3 +1,4 @@
+"use client";
 import { Card } from "@/components";
 import { Flex, SimpleGrid, Text, Title } from "@mantine/core";
 import { fetchRandomRecipe } from "./actions";
@@ -5,16 +6,29 @@ import { fetchFilters } from "./search/actions";
 import styles from "./page.module.css";
 import { Form } from "./components";
 import QuickSearch from "./components/quickSearch";
-
-export const dynamic = "force-dynamic";
+import { useEffect, useState } from "react";
 
 const cols = 3;
 
-export default async function Home() {
-  const [recipes, filterData] = await Promise.all([
-    fetchRandomRecipe(cols),
-    fetchFilters(),
-  ]);
+export default function Home() {
+  const [recipes, setRecipes] = useState<any[]>([]);
+  const [filterData, setFilterData] = useState<any>({
+    categories: [],
+    diets: [],
+    bakeTypes: [],
+  });
+
+  useEffect(() => {
+    async function loadData() {
+      const [recipesData, filterDataResult] = await Promise.all([
+        fetchRandomRecipe(cols),
+        fetchFilters(),
+      ]);
+      setRecipes(recipesData);
+      setFilterData(filterDataResult);
+    }
+    loadData();
+  }, []);
 
   return (
     <Flex

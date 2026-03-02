@@ -1,15 +1,11 @@
-import { redirect } from "next/navigation";
 import FormClient from "./formClient";
 
 export default function Form() {
-  async function handleSubmit(_state: null, formData: FormData) {
-    "use server";
-    const query = formData.get("q") as string;
+  function handleSubmit(query: string) {
     if (query.length > 0) {
-      redirect(`/search?q=${query}`);
+      window.location.href = `/search?q=${query}`;
     }
-    return null;
   }
 
-  return <FormClient action={handleSubmit} />;
+  return <FormClient onSubmit={handleSubmit} />;
 }

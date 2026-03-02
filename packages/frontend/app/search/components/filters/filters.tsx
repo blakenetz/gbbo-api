@@ -30,10 +30,10 @@ export interface FiltersProps {
 const debouncedSubmit = debounce(submitFilters, 1000);
 
 export default function Filters({
-  bakers,
-  diets,
-  bakeTypes,
-  categories,
+  bakers = [],
+  diets = [],
+  bakeTypes = [],
+  categories = [],
 }: FiltersProps) {
   const searchParams = useSearchParams();
   const [time, setTime] = useState(Number(searchParams.get("time")) || 0);
