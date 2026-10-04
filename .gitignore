@@ -211,5 +211,6 @@ virtualenvs/
 .turbo/
 cache/
 artifacts/
+.wrangler/
 
 
