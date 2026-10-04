@@ -1,5 +1,18 @@
 import type { Recipe, Baker, Diet, Category, BakeType, RecipeFilters, PaginationParams } from '../types'
 
+interface RecipeRow {
+  id: number
+  title: string
+  link: string
+  img: string
+  difficulty?: number
+  time?: number
+  baker_id?: number
+  baker_name: string
+  baker_img: string
+  baker_season?: number
+}
+
 export class DatabaseService {
   constructor(private db: D1Database) {}
 
@@ -36,7 +49,7 @@ export class DatabaseService {
       LEFT JOIN bakers b ON r.baker_id = b.id
       ${whereClause}
     `
-    const countResult = await this.db.prepare(countQuery).bind(...params).first()
+    const countResult = await this.db.prepare(countQuery).bind(...params).first<{ count: number }>()
     const total = countResult?.count || 0
 
     const recipesQuery = `
@@ -52,10 +65,10 @@ export class DatabaseService {
     
     const recipesResult = await this.db.prepare(recipesQuery)
       .bind(...params, limit, skip)
-      .all()
+      .all<RecipeRow>()
 
     const recipes = await Promise.all(
-      recipesResult.results.map(async (row: any) => {
+      recipesResult.results.map(async (row) => {
         const recipe: Recipe = {
           id: row.id,
           title: row.title,
@@ -96,7 +109,7 @@ export class DatabaseService {
       WHERE r.id = ?
     `
     
-    const result = await this.db.prepare(query).bind(id).first()
+    const result = await this.db.prepare(query).bind(id).first<RecipeRow>()
     if (!result) return null
 
     const recipe: Recipe = {
@@ -132,8 +145,8 @@ export class DatabaseService {
       JOIN recipe_diets rd ON d.id = rd.diet_id
       WHERE rd.recipe_id = ?
     `
-    const result = await this.db.prepare(query).bind(recipeId).all()
-    return result.results as Diet[]
+    const result = await this.db.prepare(query).bind(recipeId).all<Diet>()
+    return result.results
   }
 
   private async getRecipeCategories(recipeId: number): Promise<Category[]> {
@@ -143,8 +156,8 @@ export class DatabaseService {
       JOIN recipe_categories rc ON c.id = rc.category_id
       WHERE rc.recipe_id = ?
     `
-    const result = await this.db.prepare(query).bind(recipeId).all()
-    return result.results as Category[]
+    const result = await this.db.prepare(query).bind(recipeId).all<Category>()
+    return result.results
   }
 
   private async getRecipeBakeTypes(recipeId: number): Promise<BakeType[]> {
@@ -154,8 +167,8 @@ export class DatabaseService {
       JOIN recipe_bake_types rbt ON bt.id = rbt.bake_type_id
       WHERE rbt.recipe_id = ?
     `
-    const result = await this.db.prepare(query).bind(recipeId).all()
-    return result.results as BakeType[]
+    const result = await this.db.prepare(query).bind(recipeId).all<BakeType>()
+    return result.results
   }
 
   async getItems<T>(table: string, search?: string): Promise<{ items: T[], total: number }> {
@@ -168,13 +181,13 @@ export class DatabaseService {
     }
 
     const countQuery = `SELECT COUNT(*) as count FROM ${table} ${whereClause}`
-    const countResult = await this.db.prepare(countQuery).bind(...params).first()
+    const countResult = await this.db.prepare(countQuery).bind(...params).first<{ count: number }>()
     const total = countResult?.count || 0
 
     const itemsQuery = `SELECT * FROM ${table} ${whereClause} ORDER BY name`
-    const itemsResult = await this.db.prepare(itemsQuery).bind(...params).all()
+    const itemsResult = await this.db.prepare(itemsQuery).bind(...params).all<T>()
 
-    return { items: itemsResult.results as T[], total }
+    return { items: itemsResult.results, total }
   }
 
   async getItemById<T>(table: string, id: number): Promise<T | null> {

@@ -13,7 +13,7 @@ Deployed @ <https://gbbo-frontend.pages.dev/>
 
 ## Prerequisites
 
-- Node.js and npm (repo uses `npm@11`)
+- Node.js `>=20.19.0` (Node 22 requires `>=22.13.0`) and npm (repo uses `npm@11`)
 - Cloudflare CLI (for deployment): `npm install -g wrangler`
 
 ## Getting Started (local)
