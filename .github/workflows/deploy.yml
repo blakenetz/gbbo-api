@@ -41,14 +41,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Installs the pnpm version pinned in package.json#packageManager.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Check token exists
         run: |
@@ -61,9 +65,9 @@ jobs:
       - name: Apply D1 migrations
         run: |
           if [ "$IS_PREVIEW" = "true" ]; then
-            npx wrangler d1 migrations apply gbbo-db-dev --remote --env dev
+            pnpm exec wrangler d1 migrations apply gbbo-db-dev --remote --env dev
           else
-            npx wrangler d1 migrations apply gbbo-db --remote
+            pnpm exec wrangler d1 migrations apply gbbo-db --remote
           fi
 
       - name: Deploy to Cloudflare Workers
@@ -71,9 +75,9 @@ jobs:
         run: |
           set -o pipefail
           if [ "$IS_PREVIEW" = "true" ]; then
-            npx wrangler deploy --env dev | tee deploy.log
+            pnpm exec wrangler deploy --env dev | tee deploy.log
           else
-            npx wrangler deploy | tee deploy.log
+            pnpm exec wrangler deploy | tee deploy.log
           fi
           url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
           if [ -z "$url" ]; then
@@ -93,17 +97,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build frontend
-        run: npm run build
+        run: pnpm run build
         working-directory: packages/frontend
         env:
           NEXT_PUBLIC_API_URL: ${{ needs.deploy-api.outputs.url }}
@@ -117,7 +124,7 @@ jobs:
           BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           set -o pipefail
-          npx wrangler pages deploy ../frontend/out --project-name gbbo-frontend --branch "$BRANCH" | tee deploy.log
+          pnpm exec wrangler pages deploy ../frontend/out --project-name gbbo-frontend --branch "$BRANCH" | tee deploy.log
           if [ "$IS_PREVIEW" = "true" ]; then
             # Prefer the stable per-branch alias over the per-deployment hash URL.
             url=$(grep -oE 'https://[a-z0-9.-]+\.gbbo-frontend\.pages\.dev' deploy.log | tail -1)

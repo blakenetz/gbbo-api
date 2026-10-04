@@ -13,20 +13,23 @@ Deployed @ <https://gbbo-frontend.pages.dev/>
 
 ## Prerequisites
 
-- Node.js `>=22.13.0` and npm (repo uses `npm@11`)
-- Wrangler is installed in `packages/api-workers`; run it as `npx wrangler` from that directory (log in once with `npx wrangler login`)
+- Node.js `>=22.13.0`
+- pnpm 12 (`npm install -g pnpm@12`, or see <https://pnpm.io/installation>). The repo pins its exact version in `package.json#packageManager`, and pnpm downloads that version automatically.
+- Wrangler is installed in `packages/api-workers`; run it as `pnpm exec wrangler` from that directory (log in once with `pnpm exec wrangler login`)
+
+pnpm's default supply-chain policy refuses dependency versions published less than 24 hours ago, so a brand-new release can only be installed the next day.
 
 ## Getting Started (local)
 
 1. Install dependencies:
-   - `npm install`
+   - `pnpm install`
 
 2. Build all packages:
-   - `npm run build`
+   - `pnpm run build`
 
 3. Start local development:
-   - Frontend: `cd packages/frontend && npm run dev`
-   - Workers API: `cd packages/api-workers && npm run dev`
+   - Frontend: `cd packages/frontend && pnpm run dev`
+   - Workers API: `cd packages/api-workers && pnpm run dev`
 
 ## Deployment
 
@@ -50,16 +53,16 @@ Wrangler's D1 commands target a local database unless you pass `--remote`.
 
    ```bash
    cd packages/api-workers
-   npx wrangler d1 create gbbo-db       # production
-   npx wrangler d1 create gbbo-db-dev   # previews
+   pnpm exec wrangler d1 create gbbo-db       # production
+   pnpm exec wrangler d1 create gbbo-db-dev   # previews
    # Copy each database_id into wrangler.toml (top level and [env.dev])
    ```
 
 2. Apply the schema and data migrations:
 
    ```bash
-   npx wrangler d1 migrations apply gbbo-db --remote
-   npx wrangler d1 migrations apply gbbo-db-dev --remote --env dev
+   pnpm exec wrangler d1 migrations apply gbbo-db --remote
+   pnpm exec wrangler d1 migrations apply gbbo-db-dev --remote --env dev
    ```
 
    `migrations/0002_import_data.sql` is generated from the scraper's `gbbo.db`: `node scripts/export-data.js && node scripts/import-data.js`.
@@ -67,33 +70,34 @@ Wrangler's D1 commands target a local database unless you pass `--remote`.
 3. Deploy:
 
    ```bash
-   npm run deploy                  # production
-   npx wrangler deploy --env dev   # preview API
+   pnpm run deploy                       # production
+   pnpm exec wrangler deploy --env dev   # preview API
    ```
 
 ## Package Scripts
 
 Root scripts (powered by Turborepo):
 
-- `npm run build` — builds all packages
-- `npm run dev` — runs dev servers (where applicable)
-- `npm run start` — starts production servers
-- `npm run lint` — lints all packages
-- `npm run setup` — runs setup tasks
+- `pnpm run build` — builds all packages
+- `pnpm run dev` — runs dev servers (where applicable)
+- `pnpm run start` — starts production servers
+- `pnpm run lint` — lints all packages
+- `pnpm run setup` — runs setup tasks
 
 ### Individual Packages
 
 - **Frontend** (`packages/frontend`):
-  - `npm run dev` — Next.js dev server
-  - `npm run build` — Build for static export
+  - `pnpm run dev` — Next.js dev server
+  - `pnpm run build` — Build for static export
 
 - **API Workers** (`packages/api-workers`):
-  - `npm run dev` — Local Workers dev
-  - `npm run deploy` — Deploy to Cloudflare
+  - `pnpm run dev` — Local Workers dev
+  - `pnpm run deploy` — Deploy to Cloudflare
+  - `pnpm run d1:local` — Apply migrations to the local D1 database used by `pnpm run dev`
 
 - **Scraper** (`packages/scraper`):
-  - `npm run scrape` — Run data scraper
-  - `npm run setup` — Initialize database
+  - `pnpm run scrape` — Run data scraper
+  - `pnpm run setup` — Initialize database
 
 ## API Overview
 

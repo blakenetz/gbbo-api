@@ -1,0 +1,8 @@
+packages:
+  - "packages/*"
+
+# Dependencies allowed to run install scripts.
+allowBuilds:
+  esbuild: true # platform binary for wrangler's bundler
+  sqlite3: true # native addon used by the scraper and data scripts
+  workerd: true # local Workers runtime for wrangler dev

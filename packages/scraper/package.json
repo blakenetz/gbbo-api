@@ -19,7 +19,7 @@
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
-    "@gbbo/frontend": "^0.1.0",
+    "@gbbo/frontend": "workspace:^",
     "@types/jsdom": "^30.0.0",
     "@types/lodash": "^4.17.25",
     "@types/node": "^26.6.4",
