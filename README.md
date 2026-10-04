@@ -13,8 +13,8 @@ Deployed @ <https://gbbo-frontend.pages.dev/>
 
 ## Prerequisites
 
-- Node.js `>=20.19.0` (Node 22 requires `>=22.13.0`) and npm (repo uses `npm@11`)
-- Cloudflare CLI (for deployment): `npm install -g wrangler`
+- Node.js `>=22.13.0` and npm (repo uses `npm@11`)
+- Wrangler is installed in `packages/api-workers`; run it as `npx wrangler` from that directory (log in once with `npx wrangler login`)
 
 ## Getting Started (local)
 
