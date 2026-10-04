@@ -1,5 +1,5 @@
 import { Recipe, RecipeSearchParams } from "@/types";
-import { API_URL, cacheConfig, paginationAmount } from "@/util";
+import { API_URL, paginationAmount } from "@/util";
 import { Diet, Baker, BakeType, Category } from "@/types";
 
 export async function fetchFilters(): Promise<{
@@ -9,10 +9,10 @@ export async function fetchFilters(): Promise<{
   categories: Category[];
 }> {
   const responses = await Promise.all([
-    fetch(`${API_URL}/baker`, cacheConfig),
-    fetch(`${API_URL}/diet`, cacheConfig),
-    fetch(`${API_URL}/bake_type`, cacheConfig),
-    fetch(`${API_URL}/category`, cacheConfig),
+    fetch(`${API_URL}/baker`),
+    fetch(`${API_URL}/diet`),
+    fetch(`${API_URL}/bake_type`),
+    fetch(`${API_URL}/category`),
   ]);
 
   const [bakers, diets, bakeTypes, categories] = await Promise.all(
