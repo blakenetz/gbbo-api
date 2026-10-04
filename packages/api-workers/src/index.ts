@@ -12,11 +12,19 @@ type Bindings = {
   ENVIRONMENT: string
 }
 
+const allowedOrigins: Record<string, true> = {
+  'http://localhost:3000': true,
+  'http://localhost:3001': true,
+  'https://gbbo-frontend.pages.dev': true,
+}
+// Cloudflare Pages preview deployments: https://<deployment hash or branch alias>.gbbo-frontend.pages.dev
+const previewOrigin = /^https:\/\/[a-z0-9-]+\.gbbo-frontend\.pages\.dev$/
+
 const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('*', logger())
 app.use('*', cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'https://gbbo.pages.dev'],
+  origin: (origin) => (allowedOrigins[origin] === true || previewOrigin.test(origin) ? origin : null),
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }))

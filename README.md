@@ -32,34 +32,43 @@ Deployed @ <https://gbbo-frontend.pages.dev/>
 
 ### Automatic (GitHub Actions)
 
-1. Add GitHub secrets:
-   - `CLOUDFLARE_API_TOKEN`
-   - `CLOUDFLARE_ACCOUNT_ID`
+`.github/workflows/deploy.yml` deploys both packages:
 
-2. Push to `feat/cloudflare-migration` branch to trigger deployment.
+- **Push to `main` → production.** Applies D1 migrations to `gbbo-db`, deploys the `gbbo-api` worker, builds the frontend against that worker's URL, and deploys it to the `gbbo-frontend` Pages project (<https://gbbo-frontend.pages.dev/>).
+- **Pull request → preview.** Runs the same steps against the `dev` environment: the `gbbo-db-dev` D1 database, the `gbbo-api-dev` worker, and a Pages branch preview (`https://<branch>.gbbo-frontend.pages.dev`). Both URLs are linked on the PR as the `preview` and `preview-api` deployments. Pull requests from forks are skipped because they don't receive secrets.
+
+Required GitHub secrets:
+
+- `CLOUDFLARE_API_TOKEN` (needs edit access to Workers Scripts, D1 and Pages)
+- `CLOUDFLARE_ACCOUNT_ID`
 
 ### Manual (CLI)
 
-1. Create D1 database (once):
+Wrangler's D1 commands target a local database unless you pass `--remote`.
+
+1. Create the D1 databases (once):
 
    ```bash
    cd packages/api-workers
-   npx wrangler d1 create gbbo-db
-   # Copy database_id into wrangler.toml
+   npx wrangler d1 create gbbo-db       # production
+   npx wrangler d1 create gbbo-db-dev   # previews
+   # Copy each database_id into wrangler.toml (top level and [env.dev])
    ```
 
-2. Apply schema and import data:
+2. Apply the schema and data migrations:
 
    ```bash
-   npx wrangler d1 migrations apply gbbo-db --env production
-   node scripts/export-data.js
-   node scripts/import-data.js
-   npx wrangler d1 execute gbbo-db --env production --file migrations/0002_import_data.sql
+   npx wrangler d1 migrations apply gbbo-db --remote
+   npx wrangler d1 migrations apply gbbo-db-dev --remote --env dev
    ```
+
+   `migrations/0002_import_data.sql` is generated from the scraper's `gbbo.db`: `node scripts/export-data.js && node scripts/import-data.js`.
 
 3. Deploy:
+
    ```bash
-   npm run deploy
+   npm run deploy                  # production
+   npx wrangler deploy --env dev   # preview API
    ```
 
 ## Package Scripts

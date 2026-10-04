@@ -6,3 +6,12 @@ compatibility_date = "2024-01-01"
 binding = "DB"
 database_name = "gbbo-db"
 database_id = "42e17f6c-b018-406f-a1e0-17c59b793556"
+
+# Pull request previews (see .github/workflows/deploy.yml)
+[env.dev]
+name = "gbbo-api-dev"
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "gbbo-db-dev"
+database_id = "ee390f24-40aa-4005-be13-9a0cd3e76a2e"
