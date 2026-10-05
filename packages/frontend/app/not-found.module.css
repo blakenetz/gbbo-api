@@ -1,0 +1,47 @@
+.page {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: var(--mantine-spacing-xl);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    /* Leaves room for the floating menu button. */
+    padding: 72px var(--mantine-spacing-sm) var(--mantine-spacing-xl);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  max-width: 640px;
+  padding: calc(var(--mantine-spacing-xl) * 2) var(--mantine-spacing-xl);
+  border: 2px solid var(--mantine-color-cocoa-1);
+  border-radius: calc(var(--mantine-radius-xl) * 1.5);
+  background:
+    radial-gradient(circle at 50% 120%, var(--mantine-color-blush-1), transparent 55%),
+    #fffdf9;
+  box-shadow: 0 18px 40px -28px rgb(78 47 33 / 0.5);
+  text-align: center;
+}
+
+/* The cupcake has sunk in the middle, as cakes that didn't rise do. */
+.logo {
+  transform: rotate(-10deg) scaleY(0.82);
+  transform-origin: bottom center;
+}
+
+.code {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--mantine-font-size-sm);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--mantine-color-cocoa-7);
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.05;
+}

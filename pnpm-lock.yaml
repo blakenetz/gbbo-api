@@ -197,9 +197,6 @@ importers:
       '@mantine/hooks':
         specifier: ^9.6.3
         version: 9.6.3(react@19.3.0)
-      lodash:
-        specifier: ^4.18.1
-        version: 4.18.1
       lucide-react:
         specifier: ^1.51.0
         version: 1.51.0(@types/react@19.3.0)(react@19.3.0)
@@ -213,9 +210,6 @@ importers:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
     devDependencies:
-      '@types/lodash':
-        specifier: ^4.17.25
-        version: 4.17.25
       '@types/node':
         specifier: ^26
         version: 26.6.4
