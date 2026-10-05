@@ -1,0 +1,115 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--mantine-spacing-xl) * 1.25);
+  max-width: 1320px;
+  margin-inline: auto;
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-xl)
+    calc(var(--mantine-spacing-xl) * 2.5);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    /* Leaves room for the floating menu button. */
+    padding: 72px var(--mantine-spacing-sm) calc(var(--mantine-spacing-xl) * 1.5);
+  }
+}
+
+/* Intro card: heading, count, search box and filters. */
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+  padding: calc(var(--mantine-spacing-xl) * 1.25);
+  border: 2px solid var(--mantine-color-cocoa-1);
+  border-radius: calc(var(--mantine-radius-xl) * 1.5);
+  background:
+    radial-gradient(circle at 100% 0%, var(--mantine-color-blush-1), transparent 35%),
+    radial-gradient(circle at 0% 120%, var(--mantine-color-mint-1), transparent 40%),
+    #fffdf9;
+  box-shadow: 0 18px 40px -28px rgb(78 47 33 / 0.5);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    padding: var(--mantine-spacing-lg) var(--mantine-spacing-md);
+  }
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.searchForm {
+  display: flex;
+  gap: var(--mantine-spacing-sm);
+  max-width: 640px;
+
+  @media (max-width: $mantine-breakpoint-xs) {
+    flex-direction: column;
+  }
+}
+
+.searchInput {
+  flex: 1;
+}
+
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-xs);
+}
+
+.dropdown {
+  min-width: 240px;
+  max-height: min(420px, 70vh);
+  overflow-y: auto;
+}
+
+.optionIcon {
+  flex-shrink: 0;
+  color: var(--mantine-color-mint-8);
+}
+
+.activeFilters {
+  padding-top: var(--mantine-spacing-xs);
+  border-top: 1px dashed var(--mantine-color-blush-3);
+}
+
+.chip {
+  background-color: var(--mantine-color-butter-1);
+  color: var(--mantine-color-butter-9);
+  font-weight: 700;
+}
+
+/* Previous results stay visible, dimmed, while the next page loads. */
+.results {
+  transition: opacity 150ms ease;
+
+  &[data-loading] {
+    opacity: 0.55;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  padding: calc(var(--mantine-spacing-xl) * 2) var(--mantine-spacing-lg);
+  border: 2px dashed var(--mantine-color-blush-3);
+  border-radius: calc(var(--mantine-radius-xl) * 1.5);
+  background-color: #fffdf9;
+  text-align: center;
+}
+
+/* A sunken cupcake for an empty result. */
+.sunkenLogo {
+  transform: rotate(-12deg) translateY(6px);
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-md);
+}

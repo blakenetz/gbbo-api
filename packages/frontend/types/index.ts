@@ -13,22 +13,6 @@ export interface Recipe {
 	categories: Category[];
 }
 
-type RecipeSearchParamsKeys =
-	| "limit"
-	| "skip"
-	| "q"
-	| "difficulty"
-	| "time"
-	| "baker_ids"
-	| "diet_ids"
-	| "category_ids"
-	| "bake_type_ids"
-	| "season"
-	| "page";
-export type RecipeSearchParams = Partial<
-	Record<RecipeSearchParamsKeys, string>
->;
-
 export interface BaseModel {
 	id: number;
 	name: string;

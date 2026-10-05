@@ -1,5 +1,5 @@
 import { Diet as DietType } from "@/types";
-import { WheatOff, MilkOff, LeafyGreen, Vegan } from "lucide-react";
+import { WheatOff, MilkOff, LeafyGreen, Vegan, type LucideIcon } from "lucide-react";
 import {
   MantineColor,
   Tooltip,
@@ -17,7 +17,7 @@ interface DietIconProps extends DietProps, ActionIconProps {}
 
 export const dietIcons: Record<
   DietType["name"],
-  { Icon: React.ElementType; color: MantineColor }
+  { Icon: LucideIcon; color: MantineColor }
 > = {
   "Gluten Free": { Icon: WheatOff, color: "yellow" },
   "Dairy Free": { Icon: MilkOff, color: "indigo" },
