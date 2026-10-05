@@ -12,6 +12,8 @@ async function main() {
     await addPublishedDates();
   } catch (e) {
     console.error("Scraping failed:", e);
+    // Non-zero exit so scheduled runs fail visibly instead of syncing partial data.
+    process.exitCode = 1;
   }
 }
 

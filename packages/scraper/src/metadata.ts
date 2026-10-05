@@ -37,5 +37,6 @@ export async function addMetadata(): Promise<void> {
     }
   } catch (e) {
     console.error("Failed to add metadata:", e);
+    throw e;
   }
 }

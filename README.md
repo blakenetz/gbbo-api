@@ -46,6 +46,15 @@ Required GitHub secrets:
 - `CLOUDFLARE_API_TOKEN` (needs edit access to Workers Scripts, D1 and Pages)
 - `CLOUDFLARE_ACCOUNT_ID`
 
+### Weekly recipe sync (GitHub Actions)
+
+`.github/workflows/sync-recipes.yml` keeps the production database up to date while a series airs, at no cost (scheduled Actions minutes are free for public repositories).
+
+- **When:** Wednesdays and Fridays at 06:00 UTC. Episodes air on Tuesdays and GBBO usually publishes the technical that evening; Friday catches late uploads. GitHub may start scheduled runs a few minutes late.
+- **How:** it exports the D1 database, runs the scraper against a copy, and applies only new or changed rows (`pnpm --filter @gbbo/scraper run sync before.db after.db changes.sql` generates the SQL). Rows are never deleted, and if the scrape fails nothing is applied. Each run's summary lists what changed.
+- **Stopping:** when the newest recipe is more than 14 days old (two missed episodes), the series is over and the workflow disables itself. Re-enable it for the next series with `gh workflow enable sync-recipes.yml`.
+- **Manual runs:** `gh workflow run sync-recipes.yml` (production) or `gh workflow run sync-recipes.yml -f environment=dev`.
+
 ### Manual (CLI)
 
 Wrangler's D1 commands target a local database unless you pass `--remote`.
@@ -91,7 +100,7 @@ Tests by package:
 
 - **API Workers** — integration tests run the worker in the Workers runtime against a local D1 database built from `migrations/` (via `@cloudflare/vitest-plugin`). Expected values come from SQL over that same database.
 - **Frontend** — unit tests for search paging, URL updates and filter labels.
-- **Scraper** — unit tests for reading publish dates from recipe pages' JSON-LD.
+- **Scraper** — unit tests for publish-date and cooking-time parsing, and for the sync SQL (applying it makes the old database match the new one; nothing is ever deleted).
 
 ### Individual Packages
 
