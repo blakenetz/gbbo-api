@@ -6,6 +6,7 @@ export interface Recipe {
   difficulty?: number
   time?: number
   baker_id?: number
+  published_at: string | null
   baker?: Baker
   diets?: Diet[]
   categories?: Category[]
@@ -53,3 +54,5 @@ export interface PaginationParams {
   limit?: number
   skip?: number
 }
+
+export type RecipeSort = 'title' | 'recent'

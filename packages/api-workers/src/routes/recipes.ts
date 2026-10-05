@@ -1,47 +1,51 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { DatabaseService } from '../services/database'
-import type { Recipe, RecipeFilters, PaginationParams } from '../types'
+import type { RecipeFilters, PaginationParams, RecipeSort } from '../types'
 
 const recipes = new Hono<{ Bindings: { DB: D1Database } }>()
 
+function parseNumber(value: string | undefined): number | undefined {
+  const parsed = value === undefined ? NaN : parseInt(value)
+  return Number.isNaN(parsed) ? undefined : parsed
+}
+
+// Accepts repeated (`?diet_ids=1&diet_ids=2`) and comma-separated (`?diet_ids=1,2`) ids.
+function parseIds(c: Context, key: string): number[] | undefined {
+  const ids = (c.req.queries(key) ?? [])
+    .flatMap((value) => value.split(','))
+    .map(Number)
+    .filter(Number.isInteger)
+  return ids.length > 0 ? ids : undefined
+}
+
+function parseFilters(c: Context): RecipeFilters {
+  return {
+    q: c.req.query('q'),
+    difficulty: parseNumber(c.req.query('difficulty')),
+    time: parseNumber(c.req.query('time')),
+    season: parseNumber(c.req.query('season')),
+    baker_ids: parseIds(c, 'baker_ids'),
+    diet_ids: parseIds(c, 'diet_ids'),
+    category_ids: parseIds(c, 'category_ids'),
+    bake_type_ids: parseIds(c, 'bake_type_ids'),
+  }
+}
+
 recipes.get('/', async (c) => {
   const db = new DatabaseService(c.env.DB)
-  
-  const filters: RecipeFilters = {
-    q: c.req.query('q'),
-    difficulty: c.req.query('difficulty') ? parseInt(c.req.query('difficulty')!) : undefined,
-    time: c.req.query('time') ? parseInt(c.req.query('time')!) : undefined,
-    season: c.req.query('season') ? parseInt(c.req.query('season')!) : undefined,
-    baker_ids: c.req.query('baker_ids')?.split(',').map(Number),
-    diet_ids: c.req.query('diet_ids')?.split(',').map(Number),
-    category_ids: c.req.query('category_ids')?.split(',').map(Number),
-    bake_type_ids: c.req.query('bake_type_ids')?.split(',').map(Number),
-  }
-
   const pagination: PaginationParams = {
-    limit: c.req.query('limit') ? parseInt(c.req.query('limit')!) : 50,
-    skip: c.req.query('skip') ? parseInt(c.req.query('skip')!) : 0,
+    limit: parseNumber(c.req.query('limit')) ?? 50,
+    skip: parseNumber(c.req.query('skip')) ?? 0,
   }
 
-  const result = await db.getRecipes(filters, pagination)
+  const sort: RecipeSort = c.req.query('sort') === 'recent' ? 'recent' : 'title'
+  const result = await db.getRecipes(parseFilters(c), pagination, sort)
   return c.json(result.recipes)
 })
 
 recipes.get('/count', async (c) => {
   const db = new DatabaseService(c.env.DB)
-  
-  const filters: RecipeFilters = {
-    q: c.req.query('q'),
-    difficulty: c.req.query('difficulty') ? parseInt(c.req.query('difficulty')!) : undefined,
-    time: c.req.query('time') ? parseInt(c.req.query('time')!) : undefined,
-    season: c.req.query('season') ? parseInt(c.req.query('season')!) : undefined,
-    baker_ids: c.req.query('baker_ids')?.split(',').map(Number),
-    diet_ids: c.req.query('diet_ids')?.split(',').map(Number),
-    category_ids: c.req.query('category_ids')?.split(',').map(Number),
-    bake_type_ids: c.req.query('bake_type_ids')?.split(',').map(Number),
-  }
-
-  const result = await db.getRecipes(filters, {})
+  const result = await db.getRecipes(parseFilters(c), {})
   return c.json({ count: result.total })
 })
 

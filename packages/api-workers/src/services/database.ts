@@ -1,4 +1,4 @@
-import type { Recipe, Baker, Diet, Category, BakeType, RecipeFilters, PaginationParams } from '../types'
+import type { Recipe, Baker, Diet, Category, BakeType, RecipeFilters, PaginationParams, RecipeSort } from '../types'
 
 interface RecipeRow {
   id: number
@@ -11,15 +11,22 @@ interface RecipeRow {
   baker_name: string
   baker_img: string
   baker_season?: number
+  published_at: string | null
+}
+
+const recipeOrder: Record<RecipeSort, string> = {
+  title: 'r.title',
+  // Undated recipes sort last; id breaks ties between identical timestamps.
+  recent: 'r.published_at DESC NULLS LAST, r.id DESC',
 }
 
 export class DatabaseService {
   constructor(private db: D1Database) {}
 
-  async getRecipes(filters: RecipeFilters = {}, pagination: PaginationParams = {}): Promise<{ recipes: Recipe[], total: number }> {
+  async getRecipes(filters: RecipeFilters = {}, pagination: PaginationParams = {}, sort: RecipeSort = 'title'): Promise<{ recipes: Recipe[], total: number }> {
     const { limit = 50, skip = 0 } = pagination
     let whereClause = 'WHERE 1=1'
-    const params: any[] = []
+    const params: (string | number)[] = []
 
     if (filters.q) {
       whereClause += ` AND LOWER(r.title) LIKE LOWER(?)`
@@ -42,6 +49,19 @@ export class DatabaseService {
       whereClause += ` AND r.baker_id IN (${placeholders})`
       params.push(...filters.baker_ids)
     }
+    // A recipe matches when it has any of the selected values for each link table.
+    const linkFilters: [ids: number[] | undefined, table: string, column: string][] = [
+      [filters.diet_ids, 'recipe_diets', 'diet_id'],
+      [filters.category_ids, 'recipe_categories', 'category_id'],
+      [filters.bake_type_ids, 'recipe_bake_types', 'bake_type_id'],
+    ]
+    for (const [ids, table, column] of linkFilters) {
+      if (ids && ids.length > 0) {
+        const placeholders = ids.map(() => '?').join(',')
+        whereClause += ` AND EXISTS (SELECT 1 FROM ${table} WHERE ${table}.recipe_id = r.id AND ${table}.${column} IN (${placeholders}))`
+        params.push(...ids)
+      }
+    }
 
     const countQuery = `
       SELECT COUNT(*) as count 
@@ -54,12 +74,12 @@ export class DatabaseService {
 
     const recipesQuery = `
       SELECT 
-        r.id, r.title, r.link, r.img, r.difficulty, r.time, r.baker_id,
+        r.id, r.title, r.link, r.img, r.difficulty, r.time, r.baker_id, r.published_at,
         b.id as baker_id, b.name as baker_name, b.img as baker_img, b.season as baker_season
       FROM recipes r
       LEFT JOIN bakers b ON r.baker_id = b.id
       ${whereClause}
-      ORDER BY r.title
+      ORDER BY ${recipeOrder[sort]}
       LIMIT ? OFFSET ?
     `
     
@@ -76,7 +96,8 @@ export class DatabaseService {
           img: row.img,
           difficulty: row.difficulty,
           time: row.time,
-          baker_id: row.baker_id
+          baker_id: row.baker_id,
+          published_at: row.published_at
         }
 
         if (row.baker_id) {
@@ -102,7 +123,7 @@ export class DatabaseService {
   async getRecipeById(id: number): Promise<Recipe | null> {
     const query = `
       SELECT 
-        r.id, r.title, r.link, r.img, r.difficulty, r.time, r.baker_id,
+        r.id, r.title, r.link, r.img, r.difficulty, r.time, r.baker_id, r.published_at,
         b.id as baker_id, b.name as baker_name, b.img as baker_img, b.season as baker_season
       FROM recipes r
       LEFT JOIN bakers b ON r.baker_id = b.id
@@ -119,7 +140,8 @@ export class DatabaseService {
       img: result.img,
       difficulty: result.difficulty,
       time: result.time,
-      baker_id: result.baker_id
+      baker_id: result.baker_id,
+      published_at: result.published_at
     }
 
     if (result.baker_id) {
@@ -173,7 +195,7 @@ export class DatabaseService {
 
   async getItems<T>(table: string, search?: string): Promise<{ items: T[], total: number }> {
     let whereClause = ''
-    const params: any[] = []
+    const params: string[] = []
 
     if (search) {
       whereClause = 'WHERE LOWER(name) LIKE LOWER(?)'
