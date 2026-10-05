@@ -189,7 +189,8 @@ async function extractRecipeItems(
 				}
 			}
 
-			const time = helpers.parseTimeToMinutes(timeText);
+			// No parsable time means unknown (NULL), not zero minutes.
+			const time = helpers.parseTimeToMinutes(timeText) || null;
 
 			results.push({
 				link,
@@ -302,9 +303,19 @@ async function saveRecipeItems(items: ScrapedItem[]): Promise<void> {
 			}
 		}
 
+		// Upsert by link so existing recipes keep their id (and with it their category,
+		// diet and bake type links and publish date). An existing baker match is kept:
+		// matching is by name, so a new series' baker could otherwise claim an older
+		// namesake's recipes.
 		await runQuery(
-			`INSERT OR REPLACE INTO recipes(title, link, img, difficulty, time, baker_id)
-         VALUES(?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO recipes(title, link, img, difficulty, time, baker_id)
+         VALUES(?, ?, ?, ?, ?, ?)
+         ON CONFLICT(link) DO UPDATE SET
+           title = excluded.title,
+           img = excluded.img,
+           difficulty = excluded.difficulty,
+           time = excluded.time,
+           baker_id = COALESCE(recipes.baker_id, excluded.baker_id)`,
 			[
 				result.title,
 				result.link,

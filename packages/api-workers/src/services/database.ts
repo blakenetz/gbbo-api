@@ -1,4 +1,4 @@
-import type { Recipe, Baker, Diet, Category, BakeType, RecipeFilters, PaginationParams, RecipeSort } from '../types'
+import type { Recipe, Diet, Category, BakeType, RecipeFilters, PaginationParams, RecipeSort } from '../types'
 
 interface RecipeRow {
   id: number

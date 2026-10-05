@@ -88,21 +88,23 @@ export default function SearchPage() {
             : `${results.total} ${results.total === 1 ? "recipe" : "recipes"}`}
         </Text>
 
-        <form role="search" className={styles.searchForm} onSubmit={handleSearch}>
-          <TextInput
-            key={q ?? ""}
-            name="q"
-            defaultValue={q ?? ""}
-            aria-label="Search recipes"
-            placeholder="Search for a bake…"
-            leftSection={<Search size={18} />}
-            size="md"
-            className={styles.searchInput}
-          />
-          <Button type="submit" size="md">
-            Search
-          </Button>
-        </form>
+        <search className={styles.search}>
+          <form className={styles.searchForm} onSubmit={handleSearch}>
+            <TextInput
+              key={q ?? ""}
+              name="q"
+              defaultValue={q ?? ""}
+              aria-label="Search recipes"
+              placeholder="Search for a bake…"
+              leftSection={<Search size={18} />}
+              size="md"
+              className={styles.searchInput}
+            />
+            <Button type="submit" size="md">
+              Search
+            </Button>
+          </form>
+        </search>
 
         {definitions.length > 0 ? (
           <FilterBar definitions={definitions} />

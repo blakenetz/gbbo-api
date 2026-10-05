@@ -41,19 +41,21 @@ export default function Hero() {
         technicals to the bakers&apos; showstoppers. No soggy bottoms, we promise.
       </Text>
 
-      <form role="search" className={styles.searchForm} onSubmit={handleSubmit}>
-        <TextInput
-          name="q"
-          size="lg"
-          aria-label="Search recipes"
-          placeholder="Search for a bake…"
-          leftSection={<Search size={20} />}
-          className={styles.searchInput}
-        />
-        <Button type="submit" size="lg" rightSection={<ArrowRight size={18} />}>
-          Let&apos;s bake
-        </Button>
-      </form>
+      <search className={styles.search}>
+        <form className={styles.searchForm} onSubmit={handleSubmit}>
+          <TextInput
+            name="q"
+            size="lg"
+            aria-label="Search recipes"
+            placeholder="Search for a bake…"
+            leftSection={<Search size={20} />}
+            className={styles.searchInput}
+          />
+          <Button type="submit" size="lg" rightSection={<ArrowRight size={18} />}>
+            Let&apos;s bake
+          </Button>
+        </form>
+      </search>
 
       <Group gap={6} justify="center">
         <Text size="sm" c="dimmed" mr={4}>

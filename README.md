@@ -35,15 +35,25 @@ pnpm's default supply-chain policy refuses dependency versions published less th
 
 ### Automatic (GitHub Actions)
 
-`.github/workflows/deploy.yml` deploys both packages:
+`.github/workflows/deploy.yml` checks and deploys both packages:
 
+- **Quality checks first.** Every run starts with `pnpm run lint`, `pnpm run typecheck`, `pnpm run test` and `pnpm run build`. Nothing is migrated or deployed unless they pass. This job needs no secrets, so it also runs for pull requests from forks.
 - **Push to `main` → production.** Applies D1 migrations to `gbbo-db`, deploys the `gbbo-api` worker, builds the frontend against that worker's URL, and deploys it to the `gbbo-frontend` Pages project (<https://gbbo-frontend.pages.dev/>).
-- **Pull request → preview.** Runs the same steps against the `dev` environment: the `gbbo-db-dev` D1 database, the `gbbo-api-dev` worker, and a Pages branch preview (`https://<branch>.gbbo-frontend.pages.dev`). Both URLs are linked on the PR as the `preview` and `preview-api` deployments. Pull requests from forks are skipped because they don't receive secrets.
+- **Pull request → preview.** Runs the same steps against the `dev` environment: the `gbbo-db-dev` D1 database, the `gbbo-api-dev` worker, and a Pages branch preview (`https://<branch>.gbbo-frontend.pages.dev`). Both URLs are linked on the PR as the `preview` and `preview-api` deployments. Pull requests from forks get the quality checks but no preview, because they don't receive secrets.
 
 Required GitHub secrets:
 
 - `CLOUDFLARE_API_TOKEN` (needs edit access to Workers Scripts, D1 and Pages)
 - `CLOUDFLARE_ACCOUNT_ID`
+
+### Weekly recipe sync (GitHub Actions)
+
+`.github/workflows/sync-recipes.yml` keeps the production database up to date while a series airs, at no cost (scheduled Actions minutes are free for public repositories).
+
+- **When:** Wednesdays and Fridays at 06:00 UTC. Episodes air on Tuesdays and GBBO usually publishes the technical that evening; Friday catches late uploads. GitHub may start scheduled runs a few minutes late.
+- **How:** it exports the D1 database, runs the scraper against a copy, and applies only new or changed rows (`pnpm --filter @gbbo/scraper run sync before.db after.db changes.sql` generates the SQL). Rows are never deleted, and if the scrape fails nothing is applied. Each run's summary lists what changed.
+- **Stopping:** when the newest recipe is more than 14 days old (two missed episodes), the series is over and the workflow disables itself. Re-enable it for the next series with `gh workflow enable sync-recipes.yml`.
+- **Manual runs:** `gh workflow run sync-recipes.yml` (production) or `gh workflow run sync-recipes.yml -f environment=dev`.
 
 ### Manual (CLI)
 
@@ -76,13 +86,21 @@ Wrangler's D1 commands target a local database unless you pass `--remote`.
 
 ## Package Scripts
 
-Root scripts (powered by Turborepo):
+Root scripts:
 
 - `pnpm run build` — builds all packages
 - `pnpm run dev` — runs dev servers (where applicable)
 - `pnpm run start` — starts production servers
-- `pnpm run lint` — lints all packages
+- `pnpm run lint` — lints the whole repo with [oxlint](https://oxc.rs/docs/guide/usage/linter) (config: `.oxlintrc.json`)
+- `pnpm run typecheck` — type-checks every package (`tsc --noEmit`; the frontend runs `next typegen` first)
+- `pnpm run test` — runs every package's [Vitest](https://vitest.dev) tests
 - `pnpm run setup` — runs setup tasks
+
+Tests by package:
+
+- **API Workers** — integration tests run the worker in the Workers runtime against a local D1 database built from `migrations/` (via `@cloudflare/vitest-plugin`). Expected values come from SQL over that same database.
+- **Frontend** — unit tests for search paging, URL updates and filter labels.
+- **Scraper** — unit tests for publish-date and cooking-time parsing, and for the sync SQL (applying it makes the old database match the new one; nothing is ever deleted).
 
 ### Individual Packages
 

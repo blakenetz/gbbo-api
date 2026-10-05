@@ -1,29 +1,14 @@
 import { Recipe } from "@/types";
-import { Anchor, Button, Flex, MantineColor, Text, ThemeIcon } from "@mantine/core";
-import { Cake, CakeSlice, Clock, Croissant, LucideIcon } from "lucide-react";
+import { Anchor, Button, Flex, Text, ThemeIcon } from "@mantine/core";
+import { Clock } from "lucide-react";
 import { Diet } from "@/components";
+import { difficulties, formatTime } from "../recipeMeta";
 import { getCategoryStyle } from "../taxonomy";
 import styles from "./card.module.css";
 import Link from "next/link";
 
 interface CardContentProps {
   recipe: Recipe;
-}
-
-export const difficulties: { icon: LucideIcon; label: string; color: MantineColor }[] =
-  [
-    { icon: CakeSlice, label: "Easy", color: "green.9" },
-    { icon: Cake, label: "Medium", color: "yellow.9" },
-    { icon: Croissant, label: "Hard", color: "red.9" },
-  ];
-
-export function formatTime(minutes: number | null) {
-  if (minutes === null) return null;
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  if (!hours) return `${mins} minutes`;
-  if (!mins) return `${hours} hours`;
-  return `${hours} hours and ${mins} minutes`;
 }
 
 function Difficulty({ recipe }: CardContentProps) {

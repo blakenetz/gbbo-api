@@ -1,0 +1,110 @@
+name: Sync recipes
+
+# Scrapes the GBBO site and applies new or changed recipes to D1 while a series airs.
+# Episodes air on Tuesdays and GBBO usually publishes the technical that evening (UTC),
+# so the Wednesday run picks it up and the Friday run catches late uploads.
+#
+# Seasonal: once the newest recipe is more than 14 days old (two missed episodes), the
+# series has ended and this workflow disables itself. Re-enable it when the next series
+# starts:  gh workflow enable sync-recipes.yml
+on:
+  schedule:
+    - cron: "0 6 * * 3,5"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Database to update"
+        type: choice
+        options: [production, dev]
+        default: production
+
+# One sync at a time; never cancel one halfway through applying changes.
+concurrency:
+  group: sync-recipes
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  STALE_DAYS: 14
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    name: Scrape and sync
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      # Lets the job disable this workflow at the end of a series.
+      actions: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # Scheduled runs always target production.
+      TARGET: ${{ inputs.environment || 'production' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Select database
+        run: |
+          echo "WORKDIR=$RUNNER_TEMP/sync" >> "$GITHUB_ENV"
+          if [ "$TARGET" = "dev" ]; then
+            echo "D1_ARGS=gbbo-db-dev --env dev --remote" >> "$GITHUB_ENV"
+          else
+            echo "D1_ARGS=gbbo-db --remote" >> "$GITHUB_ENV"
+          fi
+
+      - name: Export current database
+        working-directory: packages/api-workers
+        run: |
+          mkdir -p "$WORKDIR"
+          pnpm exec wrangler d1 export $D1_ARGS --output "$WORKDIR/current.sql"
+          sqlite3 "$WORKDIR/before.db" < "$WORKDIR/current.sql"
+          cp "$WORKDIR/before.db" "$WORKDIR/after.db"
+
+      # Fails the job (and changes nothing) if the scrape errors.
+      - name: Scrape GBBO into a copy
+        working-directory: packages/scraper
+        run: DB_PATH="$WORKDIR/after.db" pnpm run scrape
+
+      - name: Plan changes
+        working-directory: packages/scraper
+        run: |
+          pnpm run --silent sync "$WORKDIR/before.db" "$WORKDIR/after.db" "$WORKDIR/changes.sql" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Apply changes
+        working-directory: packages/api-workers
+        run: |
+          if [ -s "$WORKDIR/changes.sql" ]; then
+            pnpm exec wrangler d1 execute $D1_ARGS --file "$WORKDIR/changes.sql" -y
+          else
+            echo "Nothing to apply."
+          fi
+
+      - name: Disable at the end of the series
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          newest=$(sqlite3 "$WORKDIR/after.db" "SELECT MAX(published_at) FROM recipes")
+          age_days=$(( ( $(date -u +%s) - $(date -u -d "$newest" +%s) ) / 86400 ))
+          echo "Newest recipe published $newest ($age_days days ago)."
+          if [ "$age_days" -gt "$STALE_DAYS" ]; then
+            gh workflow disable sync-recipes.yml --repo "$GITHUB_REPOSITORY"
+            echo "No new recipe for $age_days days: series over, workflow disabled." >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -8,10 +8,8 @@
       "dependsOn": ["^scrape", "^build"],
       "outputs": ["dist/**", ".next/**", "build/**"]
     },
-    "lint": {
-      "dependsOn": ["build"],
-      "outputs": []
-    },
+    "typecheck": {},
+    "test": {},
     "dev": {
       "cache": false,
       "persistent": true

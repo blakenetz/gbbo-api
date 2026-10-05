@@ -1,12 +1,11 @@
 import { Diet as DietType } from "@/types";
-import { WheatOff, MilkOff, LeafyGreen, Vegan, type LucideIcon } from "lucide-react";
 import {
-  MantineColor,
   Tooltip,
   ActionIcon,
   ActionIconProps,
   createPolymorphicComponent,
 } from "@mantine/core";
+import { dietIcons } from "../taxonomy";
 import styles from "./diet.module.css";
 import Link from "next/link";
 interface DietProps {
@@ -14,16 +13,6 @@ interface DietProps {
 }
 
 interface DietIconProps extends DietProps, ActionIconProps {}
-
-export const dietIcons: Record<
-  DietType["name"],
-  { Icon: LucideIcon; color: MantineColor }
-> = {
-  "Gluten Free": { Icon: WheatOff, color: "yellow" },
-  "Dairy Free": { Icon: MilkOff, color: "indigo" },
-  Vegetarian: { Icon: LeafyGreen, color: "green" },
-  Vegan: { Icon: Vegan, color: "teal" },
-};
 
 export const DietIcon = createPolymorphicComponent<"button", DietIconProps>(
   ({ diet, ...props }: DietIconProps) => {
