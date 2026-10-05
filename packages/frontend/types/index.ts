@@ -5,6 +5,8 @@ export interface Recipe {
 	img: string;
 	difficulty: number | null;
 	time: number | null;
+	/** ISO 8601 timestamp the recipe was published on the GBBO site. */
+	published_at: string | null;
 	baker: Baker | null;
 	diets: Diet[];
 	bake_types: BakeType[];

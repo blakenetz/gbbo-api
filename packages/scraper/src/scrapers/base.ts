@@ -48,7 +48,7 @@ async function headCheck(url: string): Promise<boolean> {
 	}
 }
 
-async function fetchPage(url: string): Promise<CheerioAPI> {
+export async function fetchPage(url: string): Promise<CheerioAPI> {
 	try {
 		console.debug(`Fetching page: ${url}`);
 		const res = await fetch(url, {

@@ -1,15 +1,8 @@
 import { Recipe } from "@/types";
-import {
-  Anchor,
-  Button,
-  Flex,
-  MantineColor,
-  MantineGradient,
-  Text,
-  ThemeIcon,
-} from "@mantine/core";
+import { Anchor, Button, Flex, MantineColor, Text, ThemeIcon } from "@mantine/core";
 import { Cake, CakeSlice, Clock, Croissant, LucideIcon } from "lucide-react";
 import { Diet } from "@/components";
+import { getCategoryStyle } from "../taxonomy";
 import styles from "./card.module.css";
 import Link from "next/link";
 
@@ -17,21 +10,14 @@ interface CardContentProps {
   recipe: Recipe;
 }
 
-const difficulties: { icon: LucideIcon; label: string; color: MantineColor }[] =
+export const difficulties: { icon: LucideIcon; label: string; color: MantineColor }[] =
   [
     { icon: CakeSlice, label: "Easy", color: "green.9" },
     { icon: Cake, label: "Medium", color: "yellow.9" },
     { icon: Croissant, label: "Hard", color: "red.9" },
   ];
 
-const categoryColors: Record<number, MantineGradient> = {
-  1: { from: "orange.4", to: "pink.4" },
-  2: { from: "yellow.4", to: "orange.4" },
-  3: { from: "indigo.4", to: "grape.4" },
-  4: { from: "green.5", to: "teal.4" },
-};
-
-function formatTime(minutes: number | null) {
+export function formatTime(minutes: number | null) {
   if (minutes === null) return null;
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
@@ -72,6 +58,7 @@ function Diets({ recipe }: CardContentProps) {
 export default function CardContent({ recipe }: CardContentProps) {
   const time = formatTime(recipe.time);
   const category = recipe.categories?.find(({ id }) => id <= 4);
+  const categoryColor = category && getCategoryStyle(category.name).color;
 
   // display in single line
   if (!category && !time) {
@@ -91,11 +78,9 @@ export default function CardContent({ recipe }: CardContentProps) {
         {category && (
           <Link href={`/search?category_ids=${category.id}`}>
             <Button
-              variant="gradient"
-              gradient={{ ...categoryColors[category.id], deg: 330 }}
+              color={`${categoryColor}.1`}
+              c={`${categoryColor}.9`}
               size="compact-sm"
-              radius="xs"
-              autoContrast
               component="span"
             >
               {category.name}

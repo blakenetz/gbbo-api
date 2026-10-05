@@ -122,6 +122,7 @@ export async function initializeDatabase(dropAndRecreate = false) {
         difficulty INTEGER,
         time INTEGER, 
         baker_id INTEGER,
+        published_at TEXT,
         FOREIGN KEY (baker_id) REFERENCES bakers(id)
       );
       
@@ -152,6 +153,12 @@ export async function initializeDatabase(dropAndRecreate = false) {
         UNIQUE(recipe_id, bake_type_id)
       );
     `);
+
+    // Databases created before published_at existed gain the column here.
+    const recipeColumns = await db.all<{ name: string }[]>("PRAGMA table_info(recipes)");
+    if (!recipeColumns.some(({ name }) => name === "published_at")) {
+      await db.exec("ALTER TABLE recipes ADD COLUMN published_at TEXT");
+    }
 
     console.info("Database initialized successfully");
   } catch (error) {

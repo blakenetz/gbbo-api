@@ -1,0 +1,8 @@
+:where(h1, h2, h3, h4, h5, h6) {
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background-color: var(--mantine-color-blush-2);
+}

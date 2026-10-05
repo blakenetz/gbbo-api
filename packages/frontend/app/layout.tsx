@@ -1,21 +1,15 @@
 import type { Metadata } from "next";
-import {
-  ColorSchemeScript,
-  createTheme,
-  Flex,
-  MantineProvider,
-} from "@mantine/core";
+import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import "@mantine/core/styles.css";
-import styles from "./page.module.css";
+import "./globals.css";
+import { bodyFont, displayFont } from "./fonts";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "GBBO Search",
-  description: "A new way to search for Great British Bake Off recipes",
+  title: "GBBO Recipes",
+  description:
+    "Every recipe from The Great British Bake Off tent, ready to search.",
 };
-
-const theme = createTheme({
-  primaryColor: "violet",
-});
 
 export default function RootLayout({
   children,
@@ -23,26 +17,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${displayFont.variable} ${bodyFont.variable}`}
+      {...mantineHtmlProps}
+    >
       <head>
-        <ColorSchemeScript />
-        <link rel="shortcut icon" href="/favicon.svg" />
+        <ColorSchemeScript defaultColorScheme="light" />
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
       </head>
       <body>
-        <MantineProvider theme={theme}>
-          <Flex
-            className={styles.root}
-            component="section"
-            justify="center"
-            align="flex-start"
-          >
-            {children}
-          </Flex>
-        </MantineProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

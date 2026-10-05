@@ -15,7 +15,7 @@ interface DietProps {
 
 interface DietIconProps extends DietProps, ActionIconProps {}
 
-const icons: Record<
+export const dietIcons: Record<
   DietType["name"],
   { Icon: React.ElementType; color: MantineColor }
 > = {
@@ -27,7 +27,7 @@ const icons: Record<
 
 export const DietIcon = createPolymorphicComponent<"button", DietIconProps>(
   ({ diet, ...props }: DietIconProps) => {
-    const { Icon, color } = icons[diet.name];
+    const { Icon, color } = dietIcons[diet.name];
     return (
       <ActionIcon
         className={styles.icon}
