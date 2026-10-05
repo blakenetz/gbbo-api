@@ -60,11 +60,15 @@
   color: var(--mantine-color-cocoa-8);
 }
 
+/* The <search> landmark sizes the form; the form lays out its fields. */
+.search {
+  width: 100%;
+  max-width: 580px;
+}
+
 .searchForm {
   display: flex;
   gap: var(--mantine-spacing-sm);
-  width: 100%;
-  max-width: 580px;
 
   @media (max-width: $mantine-breakpoint-xs) {
     flex-direction: column;

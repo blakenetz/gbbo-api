@@ -1,3 +1,4 @@
+import type { MantineColor } from "@mantine/core";
 import type { CSSProperties } from "react";
 import {
   Award,
@@ -9,11 +10,15 @@ import {
   Gift,
   Heart,
   IceCreamBowl,
+  LeafyGreen,
+  MilkOff,
   Signature,
   Sparkles,
   Star,
   Timer,
+  Vegan,
   Wheat,
+  WheatOff,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,6 +30,14 @@ export interface TaxonomyStyle {
 }
 
 const fallbackStyle: TaxonomyStyle = { icon: CakeSlice, color: "mint" };
+
+// Keyed by the diet names the API returns.
+export const dietIcons: Record<string, { Icon: LucideIcon; color: MantineColor }> = {
+  "Gluten Free": { Icon: WheatOff, color: "yellow" },
+  "Dairy Free": { Icon: MilkOff, color: "indigo" },
+  Vegetarian: { Icon: LeafyGreen, color: "green" },
+  Vegan: { Icon: Vegan, color: "teal" },
+};
 
 // Keyed by the names the API returns.
 const categoryStyles: Record<string, TaxonomyStyle> = {

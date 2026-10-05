@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "oxc",
+    "import",
+    "react",
+    "nextjs",
+    "jsx-a11y",
+    "vitest"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "rules": {
+    // The automatic JSX runtime (React 17+) doesn't need React in scope.
+    "react/react-in-jsx-scope": "off",
+    // Side-effect imports are intentional for stylesheets and env loading.
+    "import/no-unassigned-import": ["error", { "allow": ["**/*.css", "dotenv/config"] }],
+    // Vitest's expect() takes an optional failure message.
+    "vitest/valid-expect": ["error", { "maxArgs": 2 }]
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "ignorePatterns": [
+    "**/.next/**",
+    "**/out/**",
+    "**/dist/**",
+    "**/.wrangler/**",
+    "packages/frontend/next-env.d.ts"
+  ]
+}

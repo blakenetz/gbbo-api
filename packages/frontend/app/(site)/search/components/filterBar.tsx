@@ -11,6 +11,7 @@ import {
   Radio,
   Stack,
   Text,
+  VisuallyHidden,
   type ComboboxItem,
   type ComboboxItemGroup,
 } from "@mantine/core";
@@ -40,13 +41,13 @@ interface BakerSelectProps {
 function BakerSelect({ options, value, onChange }: BakerSelectProps) {
   // Options arrive sorted by series, so each group is contiguous.
   const { groups, images } = useMemo(() => {
-    const groups: ComboboxItemGroup<ComboboxItem>[] = [];
+    const grouped: ComboboxItemGroup<ComboboxItem>[] = [];
     for (const option of options) {
       const group = option.group ?? "";
-      if (groups.at(-1)?.group !== group) groups.push({ group, items: [] });
-      groups.at(-1)?.items.push({ value: option.value, label: option.label });
+      if (grouped.at(-1)?.group !== group) grouped.push({ group, items: [] });
+      grouped.at(-1)?.items.push({ value: option.value, label: option.label });
     }
-    return { groups, images: new Map(options.map((option) => [option.value, option.image])) };
+    return { groups: grouped, images: new Map(options.map((option) => [option.value, option.image])) };
   }, [options]);
 
   return (
@@ -77,7 +78,8 @@ export default function FilterBar({ definitions }: { definitions: FilterDefiniti
   const update = useSearchUpdate();
 
   return (
-    <div className={styles.filterBar} role="group" aria-label="Filters">
+    <fieldset className={styles.filterBar}>
+      <VisuallyHidden component="legend">Filters</VisuallyHidden>
       {definitions.map((definition) => {
         const selected = getSelectedValues(searchParams, definition.param);
         const setSelected = (values: string[]) =>
@@ -150,6 +152,6 @@ export default function FilterBar({ definitions }: { definitions: FilterDefiniti
           </Popover>
         );
       })}
-    </div>
+    </fieldset>
   );
 }

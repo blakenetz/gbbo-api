@@ -20,7 +20,7 @@ function collectPublishedDates(node: unknown, dates: string[]): void {
 
 // The page's JSON-LD has a WebPage node with a full timestamp and a Recipe node
 // with only the date; prefer the timestamp. Returns an ISO 8601 UTC string.
-function extractPublishedAt($: CheerioAPI): string | null {
+export function extractPublishedAt($: CheerioAPI): string | null {
   const dates: string[] = [];
   $('script[type="application/ld+json"]').each((_, element) => {
     try {

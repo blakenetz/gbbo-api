@@ -4,7 +4,7 @@ const path = require("path");
 const dbPath = path.join(__dirname, "../../../gbbo.db");
 const db = new sqlite3.Database(dbPath);
 
-async function exportData() {
+async function exportAll() {
   return new Promise((resolve, reject) => {
     const exportData = {
       bakers: [],
@@ -76,4 +76,4 @@ async function exportData() {
   });
 }
 
-exportData().catch(console.error);
+exportAll().catch(console.error);

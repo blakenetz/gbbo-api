@@ -7,9 +7,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { BakeType, Diet } from "@/types";
 import { fetchFilters } from "@/util/api";
-import { dietIcons } from "../diet/diet";
 import Logo from "../logo/logo";
-import { getBakeTypeStyle } from "../taxonomy";
+import { dietIcons, getBakeTypeStyle } from "../taxonomy";
 import styles from "./siteShell.module.css";
 
 interface SidebarProps {

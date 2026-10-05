@@ -1,7 +1,6 @@
 import { Award, Cake, ChefHat, Clock, Gauge, Leaf, Tv, type LucideIcon } from "lucide-react";
-import { difficulties } from "@/components/card/cardContent";
-import { dietIcons } from "@/components/diet/diet";
-import { getBakeTypeStyle, getCategoryStyle } from "@/components/taxonomy";
+import { difficulties } from "@/components/recipeMeta";
+import { dietIcons, getBakeTypeStyle, getCategoryStyle } from "@/components/taxonomy";
 import type { Filters, SearchFilterKey } from "@/util/api";
 
 export interface FilterOption {
@@ -38,11 +37,11 @@ const TIME_OPTIONS: FilterOption[] = [
 
 // The search page's filters, in toolbar order.
 export function buildFilterDefinitions({ bakers, bakeTypes, categories, diets }: Filters): FilterDefinition[] {
-  const seasons = [...new Set(bakers.flatMap(({ season }) => (season ? [season] : [])))].sort(
+  const seasons = [...new Set(bakers.flatMap(({ season }) => (season ? [season] : [])))].toSorted(
     (a, b) => b - a,
   );
-  const bakerOptions = [...bakers]
-    .sort((a, b) => (b.season ?? 0) - (a.season ?? 0) || a.name.localeCompare(b.name))
+  const bakerOptions = bakers
+    .toSorted((a, b) => (b.season ?? 0) - (a.season ?? 0) || a.name.localeCompare(b.name))
     .map((baker) => ({
       value: String(baker.id),
       label: baker.name,

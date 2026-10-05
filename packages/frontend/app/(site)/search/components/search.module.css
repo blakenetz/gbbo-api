@@ -38,10 +38,14 @@
   overflow-wrap: anywhere;
 }
 
+/* The <search> landmark sizes the form; the form lays out its fields. */
+.search {
+  max-width: 640px;
+}
+
 .searchForm {
   display: flex;
   gap: var(--mantine-spacing-sm);
-  max-width: 640px;
 
   @media (max-width: $mantine-breakpoint-xs) {
     flex-direction: column;
@@ -56,6 +60,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--mantine-spacing-xs);
+  /* Reset the fieldset's default box. */
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 .dropdown {

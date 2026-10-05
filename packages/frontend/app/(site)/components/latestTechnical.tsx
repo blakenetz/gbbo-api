@@ -4,7 +4,7 @@ import { Avatar, Badge, Button, Group, Image, Skeleton, Text, Title } from "@man
 import { Clock, ExternalLink, Timer } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { difficulties, formatTime } from "@/components/card/cardContent";
+import { difficulties, formatTime } from "@/components/recipeMeta";
 import { pastelVars } from "@/components/taxonomy";
 import type { Recipe } from "@/types";
 import { formatDate } from "@/util";
