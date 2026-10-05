@@ -1,6 +1,7 @@
 "use client";
 import { Text } from "@mantine/core";
-import { fetchRecipeByQuery, fetchFilters } from "./actions";
+import { fetchRecipeByQuery } from "./actions";
+import { fetchFilters } from "@/util/api";
 import { Card } from "@/components";
 import { RecipeSearchParams } from "@/types";
 import { AppShellClient } from "./components";

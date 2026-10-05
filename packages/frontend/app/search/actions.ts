@@ -1,26 +1,5 @@
-import { Recipe, RecipeSearchParams } from "@/types";
+import type { Recipe, RecipeSearchParams } from "@/types";
 import { API_URL, paginationAmount } from "@/util";
-import { Diet, Baker, BakeType, Category } from "@/types";
-
-export async function fetchFilters(): Promise<{
-  bakers: Baker[];
-  diets: Diet[];
-  bakeTypes: BakeType[];
-  categories: Category[];
-}> {
-  const responses = await Promise.all([
-    fetch(`${API_URL}/baker`),
-    fetch(`${API_URL}/diet`),
-    fetch(`${API_URL}/bake_type`),
-    fetch(`${API_URL}/category`),
-  ]);
-
-  const [bakers, diets, bakeTypes, categories] = await Promise.all(
-    responses.map((response) => response.json())
-  );
-
-  return { bakers, diets, bakeTypes, categories };
-}
 
 export function submitFilters(formData: FormData) {
   const q = formData.get("q") as string;
@@ -61,7 +40,10 @@ export async function fetchRecipeByQuery(
     page,
     ...initialParams
   } = params;
-  const queryParams = new URLSearchParams(initialParams);
+  const queryParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(initialParams)) {
+    if (value) queryParams.set(key, value);
+  }
 
   const limit = Number(page ?? 1) * paginationAmount;
   const skip = limit - paginationAmount;
